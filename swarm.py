@@ -10,7 +10,8 @@ def swarm(N, L):
     """
     #Create uniformly distributed random positions
     x = np.random.uniform(low=-L, high=L, size=(N, 2))
-    
+
+    x += 1
 
     return x
 
