@@ -5,19 +5,19 @@ from scipy.integrate import solve_ivp
 
 
 #%% Forces
-def prey_prey_deriv(t, x_vec, a):
+def prey_force(t, x_vec, a):
     x, y = x_vec
     N = x.size
     fx, fy = np.empty(N), np.empty(N) # Empty derivative arrays to be updated
 
     # For each element in x and y, calculate its derivative
-    for j in range(N):
+    for j in range(N): # IF WE CAN DO THIS WITHOUT A LOOP IT WOULD BE GREAT
         # Exclude k = j
         idx = np.where(x != x[j]) # Same index for both x and y
         x_k = x[idx]
         y_k = y[idx]
         
-        x_expr = (x[j] - x_k) / (np.abs(x[j] - x_k))**2 - a * (x[j] - x_k)
+        x_expr = (x[j] - x_k) / (np.abs(x[j] - x_k))**2 - a * (x[j] - x_k) # NEED PREDATOR
         y_expr = (y[j] - y_k) / (np.abs(y[j] - y_k))**2 - a * (y[j] - y_k)
 
         fx[j] = np.sum(x_expr) / N
@@ -27,7 +27,7 @@ def prey_prey_deriv(t, x_vec, a):
 
 
 #%% Create Swarm
-def swarm(N, L, t_end, dt):
+def prey_movement(N, L, t_end, dt):
     """
     N: int - Amount of prey
     L: float - Starting area which prey can be in
@@ -46,11 +46,9 @@ def swarm(N, L, t_end, dt):
 
     # Use Euler method to update
     for t in t_vals:
-        F = prey_prey_deriv(t=t, x_vec=x_vec[t, :], a=1)        
+        F = prey_force(t=t, x_vec=(x, y), a=1)        
+        x[t] = x[t] + F * dt
+        y[t] = y[t] + F * dt
         
-        x_vec[t, :] = x_vec[t, :] + F * dt
-        
-        
-    return x_vec
+    return x, y
 
-print(swarm(N=5, L=1, t_end=20))
