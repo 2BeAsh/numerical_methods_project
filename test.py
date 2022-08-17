@@ -1,4 +1,10 @@
+#%% Imports
 import numpy as np
-a = (np.sum(1))
+import matplotlib.pyplot as plt
 
-print(a)
+#%% Test Graph
+x = np.arange(0, 10, 1)
+y = np.random.randn(x.size)
+
+plt.plot(x, y, ".")
+plt.show()
