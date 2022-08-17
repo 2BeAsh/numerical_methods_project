@@ -17,6 +17,8 @@ def prey_force(t, x_vec, a):
         x_k = x[idx]
         y_k = y[idx]
         
+        r = 
+        
         x_expr = (x[j] - x_k) / (np.abs(x[j] - x_k))**2 - a * (x[j] - x_k) # NEED PREDATOR
         y_expr = (y[j] - y_k) / (np.abs(y[j] - y_k))**2 - a * (y[j] - y_k)
 
@@ -27,7 +29,7 @@ def prey_force(t, x_vec, a):
 
 
 #%% Create Swarm
-def prey_movement(N, L, t_end, dt):
+def prey_movement(N, L, t_end, dt, a):
     """
     N: int - Amount of prey
     L: float - Starting area which prey can be in
@@ -45,10 +47,25 @@ def prey_movement(N, L, t_end, dt):
 
 
     # Use Euler method to update
-    for t in t_vals:
-        F = prey_force(t=t, x_vec=(x, y), a=1)        
-        x[t] = x[t] + F * dt
-        y[t] = y[t] + F * dt
+    for i, t in enumerate(t_vals+dt):
+        F_x, F_y = prey_force(t=t, x_vec=(x[i-1], y[i-1]), a=a)        
+        x[i] = x[i-1] + F_x * dt
+        y[i] = y[i-1] + F_y * dt
         
     return x, y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
