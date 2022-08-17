@@ -8,7 +8,7 @@ y = np.random.randn(x.size)
 
 plt.plot(x, y, ".")
 plt.show()
-print(a)
+
 #%%
 
-# hej
+print("hej")
