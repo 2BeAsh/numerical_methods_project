@@ -38,6 +38,8 @@ def force(t, coord, a, b, c, p):
     prey_coord, predator_coord = coord
     x, y = prey_coord
     zx, zy = predator_coord
+    
+    
 
     N = x.size
     fx, fy = np.empty(N), np.empty(N) # Empty derivative arrays to be updated
@@ -143,12 +145,17 @@ def eat(prey_coord, predator_coord, r):
 
 
 #%% Test movement function
+x, y, zx, zy =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=0.2, c=2.5, p=2.4)
+#prey_coord = [x,y]
+#pred_coord = [zx, zy]
+#dx, dy, dzx, dzy = force(t=0, coord = (prey_coord, pred_coord), a = 1, b=0.2, c=2.5, p=2.4)
+#print(dx)
 
-x, y, zx, zy =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=1, c=2.5, p=3)
 for i in range(len(x)):
     plt.figure(dpi=150)
     plt.title(f"PP, t={i}")
     plt.scatter(x[i], y[i])
     plt.scatter(zx[i], zy[i], color="r")
-    plt.xlim(-5,5)
-    plt.ylim(-5,5)
+    #plt.quiver([x[i], y[i]], U =dx , V=dy)
+    plt.xlim(-2,2)
+    plt.ylim(-2,2)
