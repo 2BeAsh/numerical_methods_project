@@ -98,6 +98,8 @@ def movement(N, L, t_end, dt, a, b, c, p):
     x_list = [x]
     y_list = [y]
 
+
+
     # Predator starts in the middle of square
     zx_list = [zx]
     zy_list = [zy]
@@ -121,6 +123,19 @@ def movement(N, L, t_end, dt, a, b, c, p):
         zy_list.append(zy)
 
     return x_list, y_list, zx_list, zy_list
+
+
+#%%
+
+
+#%%
+def eat(prey_coord, predator_coord, r):
+    """
+    r: float
+        How close the predator must be to eat a prey.
+    """
+
+
 
 #%% Test movement function
 
