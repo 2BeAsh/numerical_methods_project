@@ -57,12 +57,12 @@ def force(t, coord, a, b, c, p):
         dist_predator = ((x[j] - zx)**2 + (y[j] - zy)**2)**(1/2) # Distance between prey and predator
         # dist_predator = np.where(dist_predator == 0, 0.05, dist_predator)
 
-        x_expr  = (x[j] - x_k) / dist_prey_p2 - a * (x[j] - x_k) + b * (x[j] - zx) / dist_predator**2 # Expression inside sum in Equation 1.1 in Y. Chen
-        y_expr  = (y[j] - y_k) / dist_prey_p2 - a * (y[j] - y_k) + b * (y[j] - zy) / dist_predator**2
+        x_expr  = (x[j] - x_k) / dist_prey_p2 - a * (x[j] - x_k)  # Expression inside sum in Equation 1.1 in Y. Chen
+        y_expr  = (y[j] - y_k) / dist_prey_p2 - a * (y[j] - y_k) 
 
         # Append
-        fx[j]  = 1 / N * np.sum(x_expr)
-        fy[j]  = 1 / N * np.sum(y_expr)
+        fx[j]  = 1 / N * np.sum(x_expr) + b * (x[j] - zx) / dist_predator**2
+        fy[j]  = 1 / N * np.sum(y_expr) + b * (y[j] - zy) / dist_predator**2
 
     # Predator - No need for loop since only 1 particle IF WE NEED MULTIPLE PREDATORS, WE NEED A SEPERATE LOOP FOR THIS
     # Since predator and prey may colide, add minimal distance
@@ -147,12 +147,25 @@ def movement(N, L, t_end, dt, a, b, c, p):
         # Get values
         prey_coord = [x, y]
         predator_coord = [zx, zy]
-        fx, fy, fzx, fzy = force(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p)
+        fx, fy, fzx, fzy = force_no_loop(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p)
         # Update values
         x = x + fx * dt
         y = y + fy * dt
         zx = zx + fzx * dt
         zy = zy + fzy * dt
+        
+       
+        
+        x = np.clip(x, -1, 1)
+        y = np.clip(y, -1, 1)
+        
+        if x<= -0.9 or x>=0.9:
+            fx = 0
+            fzx = 0
+        if y<= -0.9 or y>=0.9:
+            fy = 0
+            fzy = 0
+        
         
         # Distance between pred and prey
         r_min = 0.1
@@ -179,7 +192,7 @@ def movement(N, L, t_end, dt, a, b, c, p):
 
 
 #%% Test movement function
-x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=0.2, c=4, p=2.5)
+x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
 # print(N_living)
 
 #%%
@@ -203,5 +216,5 @@ for i in range(len(x)):
     plt.scatter(zx[i], zy[i], color="r", s=4)
     plt.quiver(x[i], y[i], fx[i] , fy[i])
     plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
-    plt.xlim(-2,2)
-    plt.ylim(-2,2)
+    plt.xlim(-1.2,1.2)
+    plt.ylim(-1.2,1.2)
