@@ -80,6 +80,7 @@ def force_no_loop(t, coord, a, b, c, p):
     zx, zy = pred_coord
     N = x.size
     
+    # x and y broadcasting
     xj = x[:, None]
     xk = x[None, :]
 
@@ -87,9 +88,10 @@ def force_no_loop(t, coord, a, b, c, p):
     yk =y[None, :]
 
     dist_prey_pred_p = np.sqrt((x - zx)**2 + (y - zy)**2)
-
-    dist_xy_p2 = (xj - xk)**2 + (yj - yk)**2        
-    div_term_x = np.where(dist_xy_p2 == 0, 0, (xj - xk) / dist_xy_p2) # Set terms with distance = 0 to 0
+    dist_xy_p2 = (xj - xk)**2 + (yj - yk)**2 
+    
+    # Get x and y specific, set terms with distance 0 equal to 0
+    div_term_x = np.where(dist_xy_p2 == 0, 0, (xj - xk) / dist_xy_p2)
     div_term_y = np.where(dist_xy_p2 == 0, 0, (yj - yk) / dist_xy_p2)
     
     fx = 1 / N * (np.sum(div_term_x - a * (xj - xk), axis=1)
@@ -104,10 +106,10 @@ def force_no_loop(t, coord, a, b, c, p):
 
 
 #%% Test if force function works on simple example
-#prey_coord = [np.arange(16), np.arange(16)]
-#pred_coord = np.array([0.5,0.1])
-#print(force(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1].size)
-#print(force_no_loop(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1].size)
+prey_coord = [np.arange(16), np.arange(16)]
+pred_coord = np.array([0.5,0.1])
+print(force(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[-2].size)
+print(force_no_loop(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[-2].size)
 
 #%% Create movement of prey and predator
 def movement(N, L, t_end, dt, a, b, c, p):
