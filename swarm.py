@@ -163,13 +163,9 @@ def movement(N, L, t_end, dt, a, b, c, p):
         x = np.clip(x, -1, 1)
         y = np.clip(y, -1, 1)
         
-        if x<= -0.9 or x>=0.9:
-            fx = 0
-            fzx = 0
-        if y<= -0.9 or y>=0.9:
-            fy = 0
-            fzy = 0
+        fx[x<-0.9]=0
         
+                
         
         # Distance between pred and prey
         r_min = 0.1
