@@ -100,16 +100,29 @@ def movement(N, L, t_end, dt, a, b, c, p):
     t_vals = np.arange(0, t_end, dt)
     x = np.random.uniform(low=-L, high=L, size=N)
     y = np.random.uniform(low=-L, high=L, size=N)
+    fx = np.random.random(size=N)
+    fy = np.random.random(size=N)
+    
     zx = 0
     zy = 0
     x_list = [x]
     y_list = [y]
+    
+    fx_list = [fx]
+    fy_list = [fy]
+    
+    # Predator starts with zero velocity
+    fzx_list = [0]
+    fzy_list = [0]
+
 
 
 
     # Predator starts in the middle of square
     zx_list = [zx]
     zy_list = [zy]
+    
+    
 
     for t in t_vals:
         # Get values
@@ -128,8 +141,12 @@ def movement(N, L, t_end, dt, a, b, c, p):
         y_list.append(y)
         zx_list.append(zx)
         zy_list.append(zy)
+        fx_list.append(fx)
+        fy_list.append(fy)
+        fzx_list.append(fzx)
+        fzy_list.append(fzy)
 
-    return x_list, y_list, zx_list, zy_list
+    return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list
 
 
 #%%
@@ -145,17 +162,27 @@ def eat(prey_coord, predator_coord, r):
 
 
 #%% Test movement function
-x, y, zx, zy =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=0.2, c=2.5, p=2.4)
-#prey_coord = [x,y]
-#pred_coord = [zx, zy]
-#dx, dy, dzx, dzy = force(t=0, coord = (prey_coord, pred_coord), a = 1, b=0.2, c=2.5, p=2.4)
-#print(dx)
+x, y, zx, zy, fx, fy, fzx, fzy =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=0.2, c=0.9, p=2.5)
+
+
+# Normalize vector fx, fy...
+for i in range(len(x)):
+    f_len = np.sqrt(fx[i]**2 + fy[i]**2)
+    fz_len = np.sqrt(fzx[i]**2 + fzy[i]**2)
+    fx[i] = fx[i]/f_len
+    fy[i] = fy[i]/f_len
+    fzx[i] = fzx[i]/fz_len
+    fzy[i] = fzy[i]/fz_len
+
+
+
 
 for i in range(len(x)):
     plt.figure(dpi=150)
     plt.title(f"PP, t={i}")
-    plt.scatter(x[i], y[i])
-    plt.scatter(zx[i], zy[i], color="r")
-    #plt.quiver([x[i], y[i]], U =dx , V=dy)
+    plt.scatter(x[i], y[i], s=4)
+    plt.scatter(zx[i], zy[i], color="r", s=4)
+    plt.quiver(x[i], y[i], fx[i] , fy[i])
+    plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
     plt.xlim(-2,2)
     plt.ylim(-2,2)
