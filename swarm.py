@@ -1,7 +1,7 @@
 #%% Imports
 import numpy as np
 import matplotlib.pyplot as plt
-from matplitlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation
 
 #%% Forces
 def force(t, coord, a, b, c, p):
@@ -57,7 +57,7 @@ def force(t, coord, a, b, c, p):
         # dist_predator = np.where(dist_predator == 0, 0.05, dist_predator)
 
         x_expr  = (x[j] - x_k) / dist_prey_p2 - a * (x[j] - x_k)  # Expression inside sum in Equation 1.1 in Y. Chen
-        y_expr  = (y[j] - y_k) / dist_prey_p2 - a * (y[j] - y_k) 
+        y_expr  = (y[j] - y_k) / dist_prey_p2 - a * (y[j] - y_k)
 
         # Append
         fx[j]  = 1 / N * np.sum(x_expr) + b * (x[j] - zx) / dist_predator**2
@@ -78,7 +78,7 @@ def force_no_loop(t, coord, a, b, c, p):
     x, y = prey_coord
     zx, zy = pred_coord
     N = x.size
-    
+
     # x and y broadcasting
     xj = x[:, None]
     xk = x[None, :]
@@ -87,21 +87,21 @@ def force_no_loop(t, coord, a, b, c, p):
     yk =y[None, :]
 
     dist_prey_pred = (x - zx)**2 + (y - zy)**2
-    dist_xy_p2     = (xj - xk)**2 + (yj - yk)**2 
-    
+    dist_xy_p2     = (xj - xk)**2 + (yj - yk)**2
+
     # Get x and y specific, set terms with distance 0 equal to 0
     div_term_x = np.divide(xj - xk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
     div_term_y = np.divide(yj - yk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
 
     #div_term_x = np.where(dist_xy_p2 == 0, 0, (xj - xk) / dist_xy_p2)
     #div_term_y = np.where(dist_xy_p2 == 0, 0, (yj - yk) / dist_xy_p2)
-    
+
     fx = 1 / N * np.sum(div_term_x - a * (xj - xk), axis=1) \
                   + b * (x - zx) / dist_prey_pred
-    
+
     fy = 1 / N * np.sum(div_term_y - a * (yj - yk), axis=1) \
                   + b * (y - zy) / dist_prey_pred
-    
+
     fzx = c / N * np.sum((x - zx) / dist_prey_pred**(p/2)) # Divide p by 2 because normally squared
     fzy = c / N * np.sum((y - zy) / dist_prey_pred**(p/2))
     return fx, fy, fzx, fzy
@@ -157,25 +157,25 @@ def movement(N, L, t_end, dt, a, b, c, p):
         y = y + fy * dt
         zx = zx + fzx * dt
         zy = zy + fzy * dt
-        
-       
-        
+
+
+
         x = np.clip(x, -1, 1)
         y = np.clip(y, -1, 1)
-        
+
         fx[x<=-0.99]=0
         fx[x>=0.99]=0
         fy[y<=-0.99]=0
         fy[y>=0.99]=0
-       
-        
-                
-        
+
+
+
+
         # Distance between pred and prey
         r_min = 0.05
         r = np.sqrt((x-zx)**2 + (y-zy)**2)
-        
-        
+
+
         x = x[r > r_min]
         y = y[r > r_min]
         fx = fx[r > r_min]
@@ -196,44 +196,35 @@ def movement(N, L, t_end, dt, a, b, c, p):
 
 
 #%% Animation function
-def animation(coord_list):
+def ani_func(prey_list, pred_list):
     # Set up figure and axis
     fig, ax = plt.subplots(figsize=(5,3))
     ax.set(xlim=(-3, 3), ylim=(-3, 3))
-    
+
     # Get data
-    prey_list, pred_list = coord_list
     x_list, y_list = prey_list
     zx_list, zy_list = pred_list
-    
+
     # First line
-    scat_prey = ax.scatter(x_list[0], y_list[0], color="k")[0]
-    scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")[0]
-    
+    scat_prey = ax.scatter(x_list[0], y_list[0], color="b")
+    scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")
+
     # Update line function
     def animation(i):
         # Update prey data
-        scat_prey.set_xdata(x_list[i])
-        scat_prey.set_ydata(y_list[i])
-        # Update predadtor data
-        scat_pred.set_xdata(zx_list[i])
-        scat_pred.set_ydata(zy_list[i])
+        scat_prey.set_offsets(np.c_[x[i], y[i]])
+        scat_pred.set_offsets(np.c_[zx[i], zy[i]])
 
-
-
-    anim = FuncAnimation(fig, animation, interval=100, fames=len(x_list))
-    
+    anim = FuncAnimation(fig, animation, interval=100, frames=len(x_list))
+    anim.save("animation.mp4")
     plt.draw()
     plt.show()
-    
-    
-#%%
 
-    
-    
+
 #%% Test movement function
-x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=500, L=1, t_end=3, dt=0.1, a=1, b=0.2, c=4, p=2.5)
-print(N_living)
+x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
+ani_func((x, y), (zx, zy))
+
 
 #%%
 
