@@ -1,8 +1,7 @@
 #%% Imports
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
-
+from matplitlib.animation import FuncAnimation
 
 #%% Forces
 def force(t, coord, a, b, c, p):
@@ -196,6 +195,42 @@ def movement(N, L, t_end, dt, a, b, c, p):
     return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list
 
 
+#%% Animation function
+def animation(coord_list):
+    # Set up figure and axis
+    fig, ax = plt.subplots(figsize=(5,3))
+    ax.set(xlim=(-3, 3), ylim=(-3, 3))
+    
+    # Get data
+    prey_list, pred_list = coord_list
+    x_list, y_list = prey_list
+    zx_list, zy_list = pred_list
+    
+    # First line
+    scat_prey = ax.scatter(x_list[0], y_list[0], color="k")[0]
+    scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")[0]
+    
+    # Update line function
+    def animation(i):
+        # Update prey data
+        scat_prey.set_xdata(x_list[i])
+        scat_prey.set_ydata(y_list[i])
+        # Update predadtor data
+        scat_pred.set_xdata(zx_list[i])
+        scat_pred.set_ydata(zy_list[i])
+
+
+
+    anim = FuncAnimation(fig, animation, interval=100, fames=len(x_list))
+    
+    plt.draw()
+    plt.show()
+    
+    
+#%%
+
+    
+    
 #%% Test movement function
 x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
 # print(N_living)
