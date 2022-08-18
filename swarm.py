@@ -131,15 +131,15 @@ def movement(N, L, t_end, dt, a, b, c, p):
     fx_list = [fx]
     fy_list = [fy]
 
+    # Predator starts in the middle of square
+    zx_list = [zx]
+    zy_list = [zy]
+    
     # Predator starts with zero velocity
     fzx_list = [0]
     fzy_list = [0]
 
-    # Predator starts in the middle of square
-    zx_list = [zx]
-    zy_list = [zy]
-
-    N_list = [N]
+    N_list = [N] # Amount of prey
 
     for t in t_vals:
         # Get values
@@ -151,30 +151,32 @@ def movement(N, L, t_end, dt, a, b, c, p):
         y = y + fy * dt
         zx = zx + fzx * dt
         zy = zy + fzy * dt
-
-
-
+        
+        # Create square boundary which the particles cannot escape
         x = np.clip(x, -1, 1)
         y = np.clip(y, -1, 1)
+        zx = np.clip(zx, -1, 1)
+        zy = np.clip(zy, -1, 1)
+        
+        # Set speed equal to zero at boundaries
+        # THIS MIGHT BE EASIER - fx = np.where(x > 0.99 or x<-0.99, 0, x)
+        fx[x<=-0.99] = 0
+        fx[x>=0.99] = 0
+        fy[y<=-0.99] = 0
+        fy[y>=0.99] = 0
+        fzx = np.where(fzx<0.99 or fzx>-0.99, 0, fzx) # Able to use "or" because fzx is float and not array like fx
+        fzy = np.where(fzy<0.99 or fzy>-0.99, 0, fzy)
 
-        fx[x<=-0.99]=0
-        fx[x>=0.99]=0
-        fy[y<=-0.99]=0
-        fy[y>=0.99]=0
-
-
-
-
-        # Distance between pred and prey
-        r_min = 0.05
+        # REMEMBER TO ADD PREDATOR HERE
+        
+        # Eat prey by calculating distance from prey to pred and comparing to eat radius, and then removing prey inside eat radius
+        r_min = 0.05 # Predator eats prey within this radius
         r = np.sqrt((x-zx)**2 + (y-zy)**2)
-
-
         x = x[r > r_min]
         y = y[r > r_min]
         fx = fx[r > r_min]
         fy = fy[r > r_min]
-
+        
         # Append values
         x_list.append(x)
         y_list.append(y)
@@ -185,12 +187,12 @@ def movement(N, L, t_end, dt, a, b, c, p):
         fzx_list.append(fzx)
         fzy_list.append(fzy)
         N_list.append(len(x))
-
+        
     return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list
 
 
 #%% Animation function
-def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, L=1):
+def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L=1):
     # Set up figure and axis
     fig, ax = plt.subplots(dpi=125)
     ax.set(xlim=(-2, 2), ylim=(-2, 2))
@@ -209,8 +211,9 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, L=1):
     # Boundary Box
     ax.plot([-L, -L, L, L, -L], [-L, L, L, -L, -L], "k--")
         
-    # Count eaten
-    label_eat = ax.text(1.3, 1.6, "Prey Eaten: 0", ha="center", va="center", fontsize=12)
+    # Labels
+    label_eat = ax.text(1.9, 1.6, "Prey Eaten: 0", ha="right", va="center", fontsize=12)
+    label_time = ax.text(1.9, 1.3, "Time: 0", ha="right", va="center", fontsize=12)
     
     # Update line function
     def animation(i):
@@ -226,9 +229,11 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, L=1):
         #quiv.set_offsets(np.c_[x_list[i], y_list[i]]) # 
         #quiv.set_UVC(fx_list[i], fy_list[i]) # Has a problem when prey are eaten
 
-        # Update prey eaten
+        # Update labels
         prey_eat = len(x_list[0]) - len(x_list[i])
-        label_eat.set_text(f"Prey Eaten: {prey_eat}" )
+        time_count_str = "Time: " + str(round(i * dt, 1))
+        label_eat.set_text(f"Prey Eaten: {prey_eat}")
+        label_time.set_text(time_count_str)
 
     anim = FuncAnimation(fig, animation, interval=125, frames=len(x_list))
     anim.save("animation.mp4")
@@ -238,7 +243,7 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, L=1):
 
 #%% Test animation function
 x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
-ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy))
+ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy), dt=0.2)
 
 
 #%%
