@@ -163,12 +163,16 @@ def movement(N, L, t_end, dt, a, b, c, p):
         x = np.clip(x, -1, 1)
         y = np.clip(y, -1, 1)
         
-        fx[x<-0.9]=0
+        fx[x<=-0.99]=0
+        fx[x>=0.99]=0
+        fy[y<=-0.99]=0
+        fy[y>=0.99]=0
+       
         
                 
         
         # Distance between pred and prey
-        r_min = 0.1
+        r_min = 0.05
         r = np.sqrt((x-zx)**2 + (y-zy)**2)
         
         
@@ -228,8 +232,8 @@ def animation(coord_list):
     
     
 #%% Test movement function
-x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
-# print(N_living)
+x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=500, L=1, t_end=3, dt=0.1, a=1, b=0.2, c=4, p=2.5)
+print(N_living)
 
 #%%
 
