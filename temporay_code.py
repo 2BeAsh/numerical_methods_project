@@ -58,8 +58,8 @@ def force_no_loop_combined(t, prey_coord, pred_coord, a, b, c, p):
     return fx, fy, fzx, fzy
 
 #%%
-x = np.arange(10)
-y = np.array([2,3,5,6,7,8,9,1,10,2])
+x = np.arange(15)
+y = np.array([2,3,5,6,7,8,9,1,10,2,1,1,1,2,3])
 #print(x)
 #print(y)
 print(force_no_loop_combined(t=1, prey_coord=(x,y), pred_coord=(1,1), a=1,b=1,c=1,p=1))

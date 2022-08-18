@@ -79,11 +79,11 @@ def force_no_loop(t, coord, a, b, c, p):
     zx, zy = pred_coord
     N = x.size
     
-    xk = x[:, None]
-    xj = x[None, :]
+    xj = x[:, None]
+    xk = x[None, :]
 
-    yk = y[:, None]
-    yj =y[None, :]
+    yj = y[:, None]
+    yk =y[None, :]
 
     dist_prey_pred_p = np.sqrt((x - zx)**2 + (y - zy)**2)
 
@@ -103,10 +103,10 @@ def force_no_loop(t, coord, a, b, c, p):
 
 
 #%% Test if force function works on simple example
-prey_coord = [np.arange(10), np.arange(10)]
+prey_coord = [np.arange(16), np.arange(16)]
 pred_coord = np.array([0.5,0.1])
-print(force(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3))
-
+print(force(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1].size)
+print(force_no_loop(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1].size)
 
 #%% Create movement of prey and predator
 def movement(N, L, t_end, dt, a, b, c, p):
@@ -178,9 +178,6 @@ def movement(N, L, t_end, dt, a, b, c, p):
         fzy_list.append(fzy)
 
     return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list
-
-
-#%%
 
 
 #%%
