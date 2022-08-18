@@ -64,13 +64,20 @@ def force(t, coord, a, b, c, p):
 
     # Predator - No need for loop since only 1 particle IF WE NEED MULTIPLE PREDATORS, WE NEED A SEPERATE LOOP FOR THIS
     # Since predator and prey may colide, add minimal distance
-    dist_loc = ((x - zx)**2 + (y - zy)**2)**(1/2) 
+    dist_loc = ((x - zx)**2 + (y - zy)**2)**(1/2)
     # dist_loc = np.where(dist_loc == 0, 0.05, dist_loc)
     fzx = c / N * np.sum((x - zx) / dist_loc**p)
     fzy = c / N * np.sum((y - zy) / dist_loc**p)
 
     return fx, fy, fzx, fzy
 
+#%% Getting rid of the for loop - Temporary
+def force_no_loop(t, coord, a, b, c, p):
+    x1 = x[:, None]
+    x2 = x[None, :]
+    x12 = x1 - x2
+    
+    return x12
 
 #%% Test if force function works on simple example
 prey_coord = [np.arange(10), np.arange(10)]
