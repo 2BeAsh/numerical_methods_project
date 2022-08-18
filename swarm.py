@@ -53,7 +53,7 @@ def force(t, coord, a, b, c, p):
         dist_prey_p2 = np.where(dist_prey_p2 == 0, 0.05, dist_prey_p2) # Add minimum distance between particles
 
         dist_predator = ((x[j] - zx)**2 + (y[j] - zy)**2)**(1/2) # Distance between prey and predator
-        dist_predator = np.where(dist_predator == 0, 0.05, dist_predator)
+        # dist_predator = np.where(dist_predator == 0, 0.05, dist_predator)
 
         x_expr  = (x[j] - x_k) / dist_prey_p2 - a * (x[j] - x_k) + b * (x[j] - zx) / dist_predator**2 # Expression inside sum in Equation 1.1 in Y. Chen
         y_expr  = (y[j] - y_k) / dist_prey_p2 - a * (y[j] - y_k) + b * (y[j] - zy) / dist_predator**2
@@ -65,7 +65,7 @@ def force(t, coord, a, b, c, p):
     # Predator - No need for loop since only 1 particle IF WE NEED MULTIPLE PREDATORS, WE NEED A SEPERATE LOOP FOR THIS
     # Since predator and prey may colide, add minimal distance
     dist_loc = ((x - zx)**2 + (y - zy)**2)**(1/2) 
-    dist_loc = np.where(dist_loc == 0, 0.05, dist_loc)
+    # dist_loc = np.where(dist_loc == 0, 0.05, dist_loc)
     fzx = c / N * np.sum((x - zx) / dist_loc**p)
     fzy = c / N * np.sum((y - zy) / dist_loc**p)
 
@@ -122,11 +122,11 @@ def movement(N, L, t_end, dt, a, b, c, p):
 
 #%% Test movement function
 
-x, y, zx, zy =  movement(N=400, L=6, t_end=6, dt=1, a=1, b=1, c=2.5, p=3)
+x, y, zx, zy =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=1, c=2.5, p=3)
 for i in range(len(x)):
     plt.figure(dpi=150)
     plt.title(f"PP, t={i}")
     plt.scatter(x[i], y[i])
     plt.scatter(zx[i], zy[i], color="r")
-    plt.xlim(-10,10)
-    plt.ylim(-10,10)
+    plt.xlim(-5,5)
+    plt.ylim(-5,5)
