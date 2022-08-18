@@ -182,7 +182,7 @@ def eat(prey_coord, predator_coord, r):
 
 
 #%% Test movement function
-x, y, zx, zy, fx, fy, fzx, fzy =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=0.2, c=0.9, p=2.5)
+x, y, zx, zy, fx, fy, fzx, fzy =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=0.2, c=2.1, p=2.5)
 
 
 # Normalize vector fx, fy...
