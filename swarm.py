@@ -75,6 +75,7 @@ def force(t, coord, a, b, c, p):
 
 #%% Getting rid of the for loop - Temporary
 def force_no_loop(t, coord, a, b, c, p):
+    prey_coord, pred_coord = coord
     x, y = prey_coord
     zx, zy = pred_coord
     N = x.size
@@ -103,10 +104,10 @@ def force_no_loop(t, coord, a, b, c, p):
 
 
 #%% Test if force function works on simple example
-prey_coord = [np.arange(16), np.arange(16)]
-pred_coord = np.array([0.5,0.1])
-print(force(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1].size)
-print(force_no_loop(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1].size)
+#prey_coord = [np.arange(16), np.arange(16)]
+#pred_coord = np.array([0.5,0.1])
+#print(force(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1].size)
+#print(force_no_loop(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1].size)
 
 #%% Create movement of prey and predator
 def movement(N, L, t_end, dt, a, b, c, p):
@@ -136,9 +137,6 @@ def movement(N, L, t_end, dt, a, b, c, p):
     fzx_list = [0]
     fzy_list = [0]
 
-
-
-
     # Predator starts in the middle of square
     zx_list = [zx]
     zy_list = [zy]
@@ -150,7 +148,6 @@ def movement(N, L, t_end, dt, a, b, c, p):
         prey_coord = [x, y]
         predator_coord = [zx, zy]
         fx, fy, fzx, fzy = force(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p)
-
         # Update values
         x = x + fx * dt
         y = y + fy * dt
@@ -181,18 +178,9 @@ def movement(N, L, t_end, dt, a, b, c, p):
     return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list
 
 
-#%%
-def eat(prey_coord, predator_coord, r):
-    """
-    r: float
-        How close the predator must be to eat a prey.
-    """
-
-
-
 #%% Test movement function
 x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=0.2, c=4, p=2.5)
-print(N_living)
+# print(N_living)
 
 #%%
 
