@@ -38,8 +38,8 @@ def force(t, coord, a, b, c, p):
     prey_coord, predator_coord = coord
     x, y = prey_coord
     zx, zy = predator_coord
-    
-    
+
+
 
     N = x.size
     fx, fy = np.empty(N), np.empty(N) # Empty derivative arrays to be updated
@@ -74,12 +74,12 @@ def force(t, coord, a, b, c, p):
     return fx, fy, fzx, fzy
 
 #%% Getting rid of the for loop - Temporary
-def force_no_loop(t, coord, a, b, c, p):    
+def force_no_loop(t, coord, a, b, c, p):
     prey_coord, pred_coord = coord
     x, y = prey_coord
     zx, zy = pred_coord
     N = x.size
-    
+
     xk = x[:, None]
     xj = x[None, :]
 
@@ -88,15 +88,15 @@ def force_no_loop(t, coord, a, b, c, p):
 
     dist_xy_p2 = np.sum((xj - xk)**2 + (yj - yk)**2, axis=1)
     dist_prey_pred_p = np.sqrt((x - zx)**2 + (y - zy)**2)
-    
-    fx = 1 / N * (np.sum(xj - xk, axis=1) / dist_xy_p2 
-                  - a * np.sum(xj - xk, axis=1) 
+
+    fx = 1 / N * (np.sum(xj - xk, axis=1) / dist_xy_p2
+                  - a * np.sum(xj - xk, axis=1)
                   + b * (x - zx) / dist_prey_pred_p**2)
-    
+
     fy = 1 / N * (np.sum(yj - yk, axis=1) / dist_xy_p2
                   - a * np.sum(yj - yk, axis=1)
                   + b * (y - zy) / dist_prey_pred_p**2)
-    
+
     fzx = c / N * np.sum((x - zx) / dist_prey_pred_p**p)
     fzy = c / N * np.sum((y - zy) / dist_prey_pred_p**p)
     return fx, fy, fzx, fzy
@@ -122,15 +122,15 @@ def movement(N, L, t_end, dt, a, b, c, p):
     y = np.random.uniform(low=-L, high=L, size=N)
     fx = np.random.random(size=N)
     fy = np.random.random(size=N)
-    
+
     zx = 0
     zy = 0
     x_list = [x]
     y_list = [y]
-    
+
     fx_list = [fx]
     fy_list = [fy]
-    
+
     # Predator starts with zero velocity
     fzx_list = [0]
     fzy_list = [0]
@@ -141,8 +141,8 @@ def movement(N, L, t_end, dt, a, b, c, p):
     # Predator starts in the middle of square
     zx_list = [zx]
     zy_list = [zy]
-    
-    
+
+
 
     for t in t_vals:
         # Get values
