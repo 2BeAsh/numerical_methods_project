@@ -107,12 +107,6 @@ def force_no_loop(t, coord, a, b, c, p):
     return fx, fy, fzx, fzy
 
 
-#%% Test if force function works on simple example
-prey_coord = [np.arange(16), np.arange(16)]
-pred_coord = np.array([0.5,0.1])
-#print(force(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1])
-#print(force_no_loop(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3)[1])
-
 #%% Create movement of prey and predator
 def movement(N, L, t_end, dt, a, b, c, p):
     """
@@ -198,7 +192,7 @@ def movement(N, L, t_end, dt, a, b, c, p):
 #%% Animation function
 def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list):
     # Set up figure and axis
-    fig, ax = plt.subplots(figsize=(5,3))
+    fig, ax = plt.subplots(dpi=125)
     ax.set(xlim=(-2, 2), ylim=(-2, 2))
 
     # Get data
@@ -210,7 +204,7 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list):
     # First line
     scat_prey = ax.scatter(x_list[0], y_list[0], color="b")
     scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")
-    quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0])
+    #quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0])
 
     # Update line function
     def animation(i):
@@ -219,8 +213,8 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list):
         scat_pred.set_offsets(np.c_[zx_list[i], zy_list[i]])
 
         # Update quiver
-        quiv.set_offsets(np.c_[x_list[i], y_list[i]])
-        quiv.set_UVC(fx_list[i], fy_list[i])
+        #quiv.set_offsets(np.c_[x_list[i], y_list[i]])
+        #quiv.set_UVC(fx_list[i], fy_list[i])
 
     anim = FuncAnimation(fig, animation, interval=100, frames=len(x_list))
     anim.save("animation.mp4")
