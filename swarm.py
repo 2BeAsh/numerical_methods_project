@@ -158,7 +158,7 @@ def movement(N, L, t_end, dt, a, b, c, p):
         zy = zy + fzy * dt
         
         # Distance between pred and prey
-        r_min = 0.00001
+        r_min = 0.1
         r = np.sqrt((x-zx)**2 + (y-zy)**2)
         
         
@@ -176,8 +176,9 @@ def movement(N, L, t_end, dt, a, b, c, p):
         fy_list.append(fy)
         fzx_list.append(fzx)
         fzy_list.append(fzy)
+        N_list.append(len(x))
 
-    return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list
+    return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list
 
 
 #%%
@@ -190,8 +191,10 @@ def eat(prey_coord, predator_coord, r):
 
 
 #%% Test movement function
-x, y, zx, zy, fx, fy, fzx, fzy =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=0.2, c=2.1, p=2.5)
+x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=400, L=6, t_end=30, dt=0.4, a=1, b=0.2, c=4, p=2.5)
+print(N_living)
 
+#%%
 
 # Normalize vector fx, fy...
 for i in range(len(x)):
@@ -207,7 +210,7 @@ for i in range(len(x)):
 
 for i in range(len(x)):
     plt.figure(dpi=150)
-    plt.title(f"PP, t={i}, {len(x)}")
+    plt.title(f"PP, t={i}, {N_living[i]}")
     plt.scatter(x[i], y[i], s=4)
     plt.scatter(zx[i], zy[i], color="r", s=4)
     plt.quiver(x[i], y[i], fx[i] , fy[i])
