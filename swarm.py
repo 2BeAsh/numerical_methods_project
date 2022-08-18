@@ -142,6 +142,7 @@ def movement(N, L, t_end, dt, a, b, c, p):
     zx_list = [zx]
     zy_list = [zy]
 
+    N_list = [N]
 
 
     for t in t_vals:
@@ -155,6 +156,16 @@ def movement(N, L, t_end, dt, a, b, c, p):
         y = y + fy * dt
         zx = zx + fzx * dt
         zy = zy + fzy * dt
+        
+        # Distance between pred and prey
+        r_min = 0.00001
+        r = np.sqrt((x-zx)**2 + (y-zy)**2)
+        
+        
+        x = x[r > r_min]
+        y = y[r > r_min]
+        fx = fx[r > r_min]
+        fy = fy[r > r_min]
 
         # Append values
         x_list.append(x)
@@ -199,7 +210,7 @@ for i in range(len(x)):
 
 for i in range(len(x)):
     plt.figure(dpi=150)
-    plt.title(f"PP, t={i}")
+    plt.title(f"PP, t={i}, {len(x)}")
     plt.scatter(x[i], y[i], s=4)
     plt.scatter(zx[i], zy[i], color="r", s=4)
     plt.quiver(x[i], y[i], fx[i] , fy[i])
