@@ -38,21 +38,21 @@ def force(t, coord, a, b, c, p):
     prey_coord, predator_coord = coord
     x, y = prey_coord
     zx, zy = predator_coord
-    
+
     N = x.size
     fx, fy = np.empty(N), np.empty(N) # Empty derivative arrays to be updated
-    
+
     # For each element in x and y, calculate its derivative
     for j in range(N): # IF WE CAN DO THIS WITHOUT A LOOP IT WOULD BE GREAT
         # Exclude k = j
         idx = np.where(x != x[j]) # Same index for both x and y
         x_k = x[idx]
         y_k = y[idx]
-        
-        dist_prey = np.abs(x[j] - x_k 
+
+        dist_prey = np.abs(x[j] - x_k
                          + y[j] - y_k) # Distance between prey and prey
         dist_prey = np.where(dist_prey == 0, 0.05, dist_prey) # Add minimum distance between particles
-        
+
         dist_predator = np.abs(x[j] - zx
                               +y[j] - zy) # Distance between prey and predator
         dist_predator = np.where(dist_predator == 0, 0.05, dist_predator)
@@ -63,20 +63,22 @@ def force(t, coord, a, b, c, p):
         # Append
         fx[j]  = 1 / N * np.sum(x_expr)
         fy[j]  = 1 / N * np.sum(y_expr)
-        
+
     # Predator - No need for loop since only 1 particle IF WE NEED MULTIPLE PREDATORS, WE NEED A SEPERATE LOOP FOR THIS
     # Since predator and prey may colide, add minimal distance
     dist_loc = np.abs(x - zx + y - zy)
     dist_loc = np.where(dist_loc == 0, 0.05, dist_loc)
     fzx = c / N * np.sum((x - zx) / dist_loc**p)
     fzy = c / N * np.sum((y - zy) / dist_loc**p)
-    
+
     return fx, fy, fzx, fzy
+
 
 #%% Test if force function works on simple example
 prey_coord = [np.arange(10), np.arange(10)]
 pred_coord = np.array([0.5,0.1])
 print(force(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2, p=3))
+
 
 #%% Create movement of prey and predator
 def movement(N, L, t_end, dt, a, b, c, p):
@@ -95,29 +97,29 @@ def movement(N, L, t_end, dt, a, b, c, p):
     zy = 0
     x_list = [x]
     y_list = [y]
-    
+
     # Predator starts in the middle of square
     zx_list = [zx]
     zy_list = [zy]
-    
+
     for t in t_vals:
         # Get values
         prey_coord = [x, y]
         predator_coord = [zx, zy]
         fx, fy, fzx, fzy = force(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p)
-        
+
         # Update values
         x = x + fx * dt
         y = y + fy * dt
         zx = zx + fzx * dt
         zy = zy + fzy * dt
-        
+
         # Append values
         x_list.append(x)
         y_list.append(y)
         zx_list.append(zx)
         zy_list.append(zy)
-        
+
     return x_list, y_list, zx_list, zy_list
 
 #%% Test movement function
@@ -130,6 +132,3 @@ for i in range(len(x)):
     plt.scatter(zx[i], zy[i], color="r")
     plt.xlim(-10,10)
     plt.ylim(-10,10)
-
-
-
