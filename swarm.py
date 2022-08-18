@@ -190,7 +190,7 @@ def movement(N, L, t_end, dt, a, b, c, p):
 
 
 #%% Animation function
-def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list):
+def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, L=1):
     # Set up figure and axis
     fig, ax = plt.subplots(dpi=125)
     ax.set(xlim=(-2, 2), ylim=(-2, 2))
@@ -202,27 +202,41 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list):
     fzx_list, fzy_list = pred_deriv_list
 
     # First line
-    scat_prey = ax.scatter(x_list[0], y_list[0], color="b")
+    scat_prey = ax.scatter(x_list[0], y_list[0], color="b", s=2)
     scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")
-    #quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0])
-
+    #quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0]) # Documentation says quiver([X, Y], U, V), but we have quiver(X, Y, U, V)
+    
+    # Boundary Box
+    ax.plot([-L, -L, L, L, -L], [-L, L, L, -L, -L], "k--")
+        
+    # Count eaten
+    label_eat = ax.text(1.3, 1.6, "Prey Eaten: 0", ha="center", va="center", fontsize=12)
+    
     # Update line function
     def animation(i):
         # Update scatter
         scat_prey.set_offsets(np.c_[x_list[i], y_list[i]])
         scat_pred.set_offsets(np.c_[zx_list[i], zy_list[i]])
-
+        
         # Update quiver
-        #quiv.set_offsets(np.c_[x_list[i], y_list[i]])
-        #quiv.set_UVC(fx_list[i], fy_list[i])
+       # print("x:", x_list[i].size)
+        #print("y:", y_list[i].size)
+        #print("fx:", fx_list[i].size)
+        #print("fy:", fy_list[i].size)
+        #quiv.set_offsets(np.c_[x_list[i], y_list[i]]) # 
+        #quiv.set_UVC(fx_list[i], fy_list[i]) # Has a problem when prey are eaten
 
-    anim = FuncAnimation(fig, animation, interval=100, frames=len(x_list))
+        # Update prey eaten
+        prey_eat = len(x_list[0]) - len(x_list[i])
+        label_eat.set_text(f"Prey Eaten: {prey_eat}" )
+
+    anim = FuncAnimation(fig, animation, interval=125, frames=len(x_list))
     anim.save("animation.mp4")
-    plt.draw()
-    plt.show()
+    #plt.draw()
+    #plt.show()
 
 
-#%% Test movement function
+#%% Test animation function
 x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
 ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy))
 
