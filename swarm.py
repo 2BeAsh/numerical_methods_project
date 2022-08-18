@@ -74,12 +74,32 @@ def force(t, coord, a, b, c, p):
     return fx, fy, fzx, fzy
 
 #%% Getting rid of the for loop - Temporary
-def force_no_loop(t, coord, a, b, c, p):
-    x1 = x[:, None]
-    x2 = x[None, :]
-    x12 = x1 - x2
+def force_no_loop(t, coord, a, b, c, p):    
+    prey_coord, pred_coord = coord
+    x, y = prey_coord
+    zx, zy = pred_coord
+    N = x.size
     
-    return x12
+    xk = x[:, None]
+    xj = x[None, :]
+
+    yk = y[:, None]
+    yj =y[None, :]
+
+    dist_xy_p2 = np.sum((xj - xk)**2 + (yj - yk)**2, axis=1)
+    dist_prey_pred_p = np.sqrt((x - zx)**2 + (y - zy)**2)
+    
+    fx = 1 / N * (np.sum(xj - xk, axis=1) / dist_xy_p2 
+                  - a * np.sum(xj - xk, axis=1) 
+                  + b * (x - zx) / dist_prey_pred_p**2)
+    
+    fy = 1 / N * (np.sum(yj - yk, axis=1) / dist_xy_p2
+                  - a * np.sum(yj - yk, axis=1)
+                  + b * (y - zy) / dist_prey_pred_p**2)
+    
+    fzx = c / N * np.sum((x - zx) / dist_prey_pred_p**p)
+    fzy = c / N * np.sum((y - zy) / dist_prey_pred_p**p)
+    return fx, fy, fzx, fzy
 
 #%% Test if force function works on simple example
 prey_coord = [np.arange(10), np.arange(10)]
