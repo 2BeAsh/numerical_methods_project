@@ -192,25 +192,32 @@ def movement(N, L, t_end, dt, a, b, c, p):
 
 
 #%% Animation function
-def ani_func(prey_list, pred_list):
+def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list):
     # Set up figure and axis
     fig, ax = plt.subplots(figsize=(5,3))
-    ax.set(xlim=(-3, 3), ylim=(-3, 3))
+    ax.set(xlim=(-2, 2), ylim=(-2, 2))
     
     # Get data
     x_list, y_list = prey_list
     zx_list, zy_list = pred_list
+    fx_list, fy_list = prey_deriv_list
+    fzx_list, fzy_list = pred_deriv_list
     
     # First line
     scat_prey = ax.scatter(x_list[0], y_list[0], color="b")
     scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")
+    quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0])
     
     # Update line function
     def animation(i):
-        # Update prey data
-        scat_prey.set_offsets(np.c_[x[i], y[i]])
-        scat_pred.set_offsets(np.c_[zx[i], zy[i]])
-
+        # Update scatter 
+        scat_prey.set_offsets(np.c_[x_list[i], y_list[i]])
+        scat_pred.set_offsets(np.c_[zx_list[i], zy_list[i]])
+        
+        # Update quiver
+        quiv.set_offsets(np.c_[x_list[i], y_list[i]])
+        quiv.set_UVC(fx_list[i], fy_list[i])
+        
     anim = FuncAnimation(fig, animation, interval=100, frames=len(x_list))
     anim.save("animation.mp4")
     plt.draw()
@@ -219,7 +226,7 @@ def ani_func(prey_list, pred_list):
     
 #%% Test movement function
 x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
-ani_func((x, y), (zx, zy))
+ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy))
 
 
 #%%
