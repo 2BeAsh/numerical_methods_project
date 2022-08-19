@@ -1,5 +1,8 @@
 #%% Imports
 import numpy as np
+import scipy as sp
+from scipy import sparse
+from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
@@ -106,6 +109,58 @@ def force_no_loop(t, coord, a, b, c, p):
     fzy = c / N * np.sum((y - zy) / dist_prey_pred**(p/2))
     return fx, fy, fzx, fzy
 
+#%% Velocity Force
+def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
+    prey_coord, pred_coord = coord
+    x, y = prey_coord
+    zx, zy = pred_coord
+    N = x.size
+        
+    # x and y broadcasting
+    xj = x[:, None]
+    xk = x[None, :]
+
+    yj = y[:, None]
+    yk =y[None, :]
+
+    dist_prey_pred = (x - zx)**2 + (y - zy)**2
+    dist_xy_p2     = (xj - xk)**2 + (yj - yk)**2
+
+    # Get x and y specific, set terms with distance 0 equal to 0
+    div_term_x = np.divide(xj - xk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
+    div_term_y = np.divide(yj - yk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
+
+    #div_term_x = np.where(dist_xy_p2 == 0, 0, (xj - xk) / dist_xy_p2)
+    #div_term_y = np.where(dist_xy_p2 == 0, 0, (yj - yk) / dist_xy_p2)
+
+    fx = 1 / N * np.sum(div_term_x - a * (xj - xk), axis=1) \
+                  + b * (x - zx) / dist_prey_pred
+
+    fy = 1 / N * np.sum(div_term_y - a * (yj - yk), axis=1) \
+                  + b * (y - zy) / dist_prey_pred
+
+    fzx = c / N * np.sum((x - zx) / dist_prey_pred**(p/2)) # Divide p by 2 because normally squared
+    fzy = c / N * np.sum((y - zy) / dist_prey_pred**(p/2))
+    
+    
+    # Tree xy
+    theta = np.arctan(fy/fx)
+    pos = np.empty((N,2))
+    pos[:, 0] = x
+    pos[:, 1] = y
+    tree = KDTree(pos, boxsize=[L,L])
+    dist = tree.sparse_distance_matrix(tree, max_distance=r0, output_type="coo_matrix")
+    data = np.exp(theta[dist.col]*1j)
+    neigh = sparse.coo_matrix((data, (dist.row, dist.col)), shape=dist.get_shape())
+    S = np.squeeze(np.asarray(neigh.tocsr().sum(axis=1)))
+    
+    theta = np.angle(S) + eta * np.random.uniform(-np.pi, np.pi, size=N)
+    
+    fx_rot = fx * np.cos(theta) - fy * np.sin(theta)
+    fy_rot = fx * np.sin(theta) + fy * np.cos(theta)
+    
+    return fx_rot, fy_rot, fzx, fzy
+
 
 #%% Create movement of prey and predator
 def movement(N, L, t_end, dt, a, b, c, p):
@@ -164,8 +219,8 @@ def movement(N, L, t_end, dt, a, b, c, p):
         fx[x>=0.99] = 0
         fy[y<=-0.99] = 0
         fy[y>=0.99] = 0
-        fzx = np.where(fzx<0.99 or fzx>-0.99, 0, fzx) # Able to use "or" because fzx is float and not array like fx
-        fzy = np.where(fzy<0.99 or fzy>-0.99, 0, fzy)
+        fzx = np.where(fzx>0.99 or fzx>-0.99, 0, fzx) # Able to use "or" because fzx is float and not array like fx
+        fzy = np.where(fzy>0.99 or fzy>-0.99, 0, fzy)
 
         # REMEMBER TO ADD PREDATOR HERE
         
