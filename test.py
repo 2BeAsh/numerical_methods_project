@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-# %%
+# %% Test quiver animation
 
 # Det med quiver doc siger andet end jeg har brugt
 
@@ -60,3 +60,9 @@ ani_test(xy_vals=[x_list, y_list],
          deriv_xy=[dx_list, dy_list],
          dt=0.2,
          L=L)
+
+#%%
+x_test = np.random.uniform(size=(10,10))
+print(np.where(x_test>0.5, True, False))
+
+

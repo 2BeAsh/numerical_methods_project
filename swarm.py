@@ -123,12 +123,9 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
     dist_prey_pred = (x - zx)**2 + (y - zy)**2
     dist_xy_p2     = (xj - xk)**2 + (yj - yk)**2
 
-    # Get x and y specific, set terms with distance 0 equal to 0
-    div_term_x = np.divide(xj - xk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
+    # Set terms with distance 0 equal to 0 to avoid division by 0
+    div_term_x = np.divide(xj - xk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0) # Return zero where the denominator is 0
     div_term_y = np.divide(yj - yk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
-
-    #div_term_x = np.where(dist_xy_p2 == 0, 0, (xj - xk) / dist_xy_p2)
-    #div_term_y = np.where(dist_xy_p2 == 0, 0, (yj - yk) / dist_xy_p2)
 
     fx = 1 / N * np.sum(div_term_x - a * (xj - xk), axis=1) \
                   + b * (x - zx) / dist_prey_pred
@@ -140,8 +137,11 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
     fzy = c / N * np.sum((y - zy) / dist_prey_pred**(p/2))
 
 
-    # Tree xy
-    theta = np.arctan(fy/fx)
+    # Align angle according to average of neighbours' 
+    
+    # Calculate current angle, create single pos vector and use KDTree to find neighbours.
+    # Then apply rotation matrix with the angle = new angle - old angle
+    theta = np.arctan(fy/fx) 
     pos = np.empty((N,2))
     pos[:, 0] = x
     pos[:, 1] = y
@@ -151,81 +151,88 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
     neigh = sparse.coo_matrix((data, (dist.row, dist.col)), shape=dist.get_shape())
     S = np.squeeze(np.asarray(neigh.tocsr().sum(axis=1)))
 
-    theta = np.angle(S) + eta * np.random.uniform(-np.pi, np.pi, size=N)
-
-    fx_rot = fx * np.cos(theta) - fy * np.sin(theta)
-    fy_rot = fx * np.sin(theta) + fy * np.cos(theta)
+    theta_new = np.angle(S) + eta * np.random.uniform(-np.pi, np.pi, size=N)
+    theta_rot = theta_new - theta
+    fx_rot = fx * np.cos(theta_rot) - fy * np.sin(theta_rot)
+    fy_rot = fx * np.sin(theta_rot) + fy * np.cos(theta_rot)
 
     return fx_rot, fy_rot, fzx, fzy
 
 
 #%% Create movement of prey and predator
-def movement(N, L, t_end, dt, a, b, c, p):
+def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
     """
     N: int - Amount of prey
     L: float - Starting area which prey can be in
     t_end: float - How long the simulation should run
     dt: time step between each update
     """
-    # Initial values for prey and then predator
+    # Initial values for prey and predator
     # Prey are uniformly distributed in a square with side L
     t_vals = np.arange(0, t_end, dt)
-    x = np.random.uniform(low=-L, high=L, size=N)
-    y = np.random.uniform(low=-L, high=L, size=N)
+    x = np.random.uniform(low=0, high=L, size=N)
+    y = np.random.uniform(low=0, high=L, size=N)
     fx = np.random.random(size=N)
-    fy = np.random.random(size=N)
+    fy = np.random.random(size=N) # Should this be 0?
 
-    zx = 0
-    zy = 0
+    zx = 0.3 * L # Predator starts slightly south west of center
+    zy = 0.3 * L
     x_list = [x]
     y_list = [y]
-
     fx_list = [fx]
     fy_list = [fy]
-
-    # Predator starts in the middle of square
     zx_list = [zx]
     zy_list = [zy]
 
-    # Predator starts with zero velocity
+    # Predator starts with 0 velocity
     fzx_list = [0]
     fzy_list = [0]
 
-    N_list = [N] # Amount of prey
+    N_list = [N] # Amount of prey. Used to track how many preys eaten
 
     for t in t_vals:
-        # Get values
+        # Get and update values
         prey_coord = [x, y]
         predator_coord = [zx, zy]
         fx, fy, fzx, fzy = force_no_loop(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p)
-        # Update values
         x = x + fx * dt
         y = y + fy * dt
         zx = zx + fzx * dt
         zy = zy + fzy * dt
 
-        # Set speed equal to zero at boundaries
-        # THIS MIGHT BE EASIER - fx = np.where(x > 0.99 or x<-0.99, 0, x)
-        fx[x<=-0.99] = 0
-        fx[x>=0.99] = 0
-        fy[y<=-0.99] = 0
-        fy[y>=0.99] = 0
-        fzx = np.where(zx>0.99 or fzx>-0.99, 0, fzx) # Able to use "or" because fzx is float and not array like fx
-        fzy = np.where(zy>0.99 or fzy>-0.99, 0, fzy)
+        if boundary == "stop":
+            # Stop particles and set their speed equal to zero at boundaries
+            fx[x < 0.01 * L] = 0
+            fx[x > 0.99 * L] = 0
+            fy[y < 0.01 * L] = 0
+            fy[y > 0.99 * L] = 0
+            fzx = np.where(zx>0.99*L or fzx>0.01*L, 0, fzx) # Able to use "or" because fzx is float and not array like fx
+            fzy = np.where(zy>0.99*L or fzy>-0.01*L, 0, fzy)
+    
+            # Create square boundary which the particles cannot escape
+            x = np.clip(x, 0, 0.99*L)
+            y = np.clip(y, 0, 0.99*L)
+            zx = np.clip(zx, 0, 0.99*L)
+            zy = np.clip(zy, 0, 0.99*L)
 
-        # Create square boundary which the particles cannot escape
-        x = np.clip(x, -1, 1)
-        y = np.clip(y, -1, 1)
-        zx = np.clip(zx, -1, 1)
-        zy = np.clip(zy, -1, 1)
+
+        if boundary == "periodic":
+            x = np.where(x > L, x - L, x) # Top border
+            x = np.where(x < 0, L - x, x) # Bottom border
+            y = np.where(y > L, y - L, y)
+            y = np.where(y < 0, L - y, y) # Bottom border
+            zx = np.where(zx > L, zx - L, zx) # Top border
+            zx = np.where(zx < 0, L - zx, zx) # Bottom border
+            zy = np.where(zy > L, zy - L, zy)
+            zy = np.where(zy < 0, L - zy, zy) # Bottom border
+
 
         # Eat prey by calculating distance from prey to pred and comparing to eat radius, and then removing prey inside eat radius
-        r_min = 0.05 # Predator eats prey within this radius
-        r = np.sqrt((x-zx)**2 + (y-zy)**2)
-        x = x[r > r_min]
-        y = y[r > r_min]
-        fx = fx[r > r_min]
-        fy = fy[r > r_min]
+        r = np.sqrt((x - zx)**2 + (y - zy)**2)
+        x = x[r > r_eat]
+        y = y[r > r_eat]
+        fx = fx[r > r_eat]
+        fy = fy[r > r_eat]
 
         # Append values
         x_list.append(x)
@@ -242,16 +249,13 @@ def movement(N, L, t_end, dt, a, b, c, p):
 
 
 #%% Animation function
-def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L):
+def ani_func(N, L, t_end, dt, a, b, c, p, r_eat=0.05, boundary="stop"):
     # Set up figure and axis
     fig, ax = plt.subplots(dpi=125)
-    ax.set(xlim=(-L-1, L+1), ylim=(-L-1, L+1))
+    ax.set(xlim=(0, L), ylim=(0, L))
 
-    # Get data
-    x_list, y_list = prey_list
-    zx_list, zy_list = pred_list
-    fx_list, fy_list = prey_deriv_list
-    fzx_list, fzy_list = pred_deriv_list
+    # Get data from movement function
+    x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat)
     
     # Fill in NANs
     
@@ -260,14 +264,14 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L):
     # First line
     scat_prey = ax.scatter(x_list[0], y_list[0], color="b", s=2)
     scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")
-    quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0]) # Documentation says quiver([X, Y], U, V), but we have quiver(X, Y, U, V)
+    #quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0]) # Documentation says quiver([X, Y], U, V), but we have quiver(X, Y, U, V)
 
     # Boundary Box
-    ax.plot([-L, -L, L, L, -L], [-L, L, L, -L, -L], "k--") #OBS UPDATE WHEN TREE
+    #ax.plot([-L, -L, L, L, -L], [-L, L, L, -L, -L], "k--") #OBS UPDATE WHEN TREE
 
     # Labels
-    label_eat = ax.text(1.9, 1.6, "Prey Eaten: 0", ha="right", va="center", fontsize=12)
-    label_time = ax.text(1.9, 1.3, "Time: 0", ha="right", va="center", fontsize=12)
+    label_eat = ax.text(L, 0.95*L, "Prey Eaten: 0", ha="right", va="center", fontsize=12)
+    label_time = ax.text(L, 0.85*L, "Time: 0", ha="right", va="center", fontsize=12)
 
     # Update line function
     def animation(i):
@@ -276,12 +280,12 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L):
         scat_pred.set_offsets(np.c_[zx_list[i], zy_list[i]])
 
         # Update quiver
-        print("x:", x_list[i].size)
-        print("y:", y_list[i].size)
-        print("fx:", fx_list[i].size)
-        print("fy:", fy_list[i].size, flush=True)
-        quiv.set_offsets(np.c_[x_list[i], y_list[i]]) #
-        quiv.set_UVC(fx_list[i], fy_list[i]) # Has a problem when prey are eaten
+        #print("x:", x_list[i].size)
+        #print("y:", y_list[i].size)
+        #print("fx:", fx_list[i].size)
+        #print("fy:", fy_list[i].size, flush=True)
+        #quiv.set_offsets(np.c_[x_list[i], y_list[i]]) #
+        #quiv.set_UVC(fx_list[i], fy_list[i]) # Has a problem when prey are eaten
 
         # Update labels
         prey_eat = len(x_list[0]) - len(x_list[i])
@@ -296,13 +300,12 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L):
 
 
 #%% Test animation function
-x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
-ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy), dt=0.2)
-
+ani_func(N=10, L=1, t_end=10, dt=0.2, a=1, b=1, c=1, p=2.5, boundary="periodic")
 
 #%%
 def plot_quiver():
     # Normalize vector fx, fy...
+    x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
     for i in range(len(x)):
         f_len = np.sqrt(fx[i]**2 + fy[i]**2)
         fz_len = np.sqrt(fzx[i]**2 + fzy[i]**2)
@@ -310,9 +313,6 @@ def plot_quiver():
         fy[i] = fy[i]/f_len
         fzx[i] = fzx[i]/fz_len
         fzy[i] = fzy[i]/fz_len
-    
-    
-    
     
     for i in range(len(x)):
         plt.figure(dpi=150)
