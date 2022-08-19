@@ -199,7 +199,7 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
         y = y + fy * dt
         zx = zx + fzx * dt
         zy = zy + fzy * dt
-
+        
         if boundary == "stop":
             # Stop particles and set their speed equal to zero at boundaries
             fx[x < 0.01 * L] = 0
@@ -217,15 +217,21 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
 
 
         if boundary == "periodic":
-            x = np.where(x > L, x - L, x) # Top border
-            x = np.where(x < 0, L - x, x) # Bottom border
-            y = np.where(y > L, y - L, y)
-            y = np.where(y < 0, L - y, y) # Bottom border
-            zx = np.where(zx > L, zx - L, zx) # Top border
-            zx = np.where(zx < 0, L - zx, zx) # Bottom border
-            zy = np.where(zy > L, zy - L, zy)
-            zy = np.where(zy < 0, L - zy, zy) # Bottom border
+            L_vec = np.ones(x.size)
+            # Prey
+            x = np.where(x>0.99*L, np.minimum(x-L, L_vec*0.99*L), x) # Top border
+            x = np.where(x<0.01*L, np.maximum(L-x, L_vec*0.01*L), x) # bottom border
+            y = np.where(y>0.99*L, np.minimum(y-L, L_vec*0.99*L), y) 
+            y = np.where(y<0.01*L, np.maximum(L-y, L_vec*0.01*L), y) 
+            # Predator
+            zx = np.where(zx>0.99*L, np.minimum(zx-L, 0.99*L), zx) 
+            zx = np.where(zx<0.01*L, np.maximum(L-zx, 0.01*L), zx) 
+            zy = np.where(zy>0.99*L, np.minimum(zy-L, 0.99*L), zy) 
+            zy = np.where(zy<0.01*L, np.maximum(L-zy, 0.01*L), zy) 
 
+        accepted_boundary = ["stop", "periodic"]
+        if boundary not in accepted_boundary:
+            print("The boundary has no support, and no boundary is enforced!")
 
         # Eat prey by calculating distance from prey to pred and comparing to eat radius, and then removing prey inside eat radius
         r = np.sqrt((x - zx)**2 + (y - zy)**2)
@@ -244,15 +250,17 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
         fzx_list.append(fzx)
         fzy_list.append(fzy)
         N_list.append(len(x))
+        if N_list[-1] == 0:
+            return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list
 
+        
     return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list
-
 
 #%% Animation function
 def ani_func(N, L, t_end, dt, a, b, c, p, r_eat=0.05, boundary="stop"):
     # Set up figure and axis
     fig, ax = plt.subplots(dpi=125)
-    ax.set(xlim=(0, L), ylim=(0, L))
+    ax.set(xlim=(0, L+1), ylim=(0, L+1))
 
     # Get data from movement function
     x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat)
@@ -267,7 +275,7 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat=0.05, boundary="stop"):
     #quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0]) # Documentation says quiver([X, Y], U, V), but we have quiver(X, Y, U, V)
 
     # Boundary Box
-    #ax.plot([-L, -L, L, L, -L], [-L, L, L, -L, -L], "k--") #OBS UPDATE WHEN TREE
+    ax.plot([0, 0, L, L, 0], [0, L, L, 0, 0], "k--") #OBS UPDATE WHEN TREE
 
     # Labels
     label_eat = ax.text(L, 0.95*L, "Prey Eaten: 0", ha="right", va="center", fontsize=12)
@@ -300,7 +308,7 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat=0.05, boundary="stop"):
 
 
 #%% Test animation function
-ani_func(N=10, L=1, t_end=10, dt=0.2, a=1, b=1, c=1, p=2.5, boundary="periodic")
+ani_func(N=3, L=1, t_end=1, dt=0.01, a=1, b=1, c=1, p=2.5, boundary="periodic")
 
 #%%
 def plot_quiver():
