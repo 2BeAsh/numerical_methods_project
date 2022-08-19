@@ -82,7 +82,7 @@ import matplotlib.pyplot as plt
 
 
 #%% Vores tilfælde
-def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=0.05):
+def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.01, r0=0.1):
     prey_coord, pred_coord = coord
     x, y = prey_coord
     zx, zy = pred_coord
@@ -127,10 +127,10 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=0.05):
     neigh = sparse.coo_matrix((data, (dist.row, dist.col)), shape=dist.get_shape())
     S = np.squeeze(np.asarray(neigh.tocsr().sum(axis=1)))
 
-    theta = np.angle(S) + eta * np.random.uniform(-np.pi, np.pi, size=N)
-
-    fx_rot = fx * np.cos(theta) - fy * np.sin(theta)
-    fy_rot = fx * np.sin(theta) + fy * np.cos(theta)
+    theta_ny = np.angle(S) + eta * np.random.uniform(-np.pi, np.pi, size=N)
+    theta_rot = theta_ny - theta
+    fx_rot = fx * np.cos(theta_rot) - fy * np.sin(theta_rot)
+    fy_rot = fx * np.sin(theta_rot) + fy * np.cos(theta_rot)
 
     return fx_rot, fy_rot, fzx, fzy
 
@@ -182,10 +182,10 @@ def movement(N, L, t_end, dt, a, b, c, p):
 
         # Set speed equal to zero at boundaries
         # THIS MIGHT BE EASIER - fx = np.where(x > 0.99 or x<-0.99, 0, x)
-        fx[x<=0.01] = 0
-        fx[x>=0.99*L] = 0
-        fy[y<=0.01] = 0
-        fy[y>=0.99*L] = 0
+        fx[x<=0] = 0
+        fx[x>=L*0.99] = 0
+        fy[y<=0] = 0
+        fy[y>=L*0.99] = 0
         fzx = np.where(zx>0.99*L or zx>0.01, 0, fzx) # Able to use "or" because fzx is float and not array like fx
         fzy = np.where(zy>0.99*L or zy>0.01, 0, fzy)
 
@@ -270,14 +270,14 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L=1):
     #plt.draw()
     #plt.show()
 #%%
-N=200
+N=500
 prey_coord = (np.random.uniform(0, 0.99, size=N), np.random.uniform(0, 0.99, size=N))
 pred_coord = (0.11, 0.11)
 #fx, fy, fzx, fzy = force_vel(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=0.1)
 
 
-x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=N, L=1, t_end=5, dt=0.05, a=1, b=1, c=0.8, p=3)
-ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy), dt=0.2)
+x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=N, L=1, t_end=1, dt=0.01, a=1.2, b=0.2, c=0.1, p=2.5)
+#ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy), dt=0.2)
 
 #%%
 # Normalize vector fx, fy...
@@ -293,8 +293,8 @@ for i in range(len(x)):
 for i in range(len(x)):
     plt.figure(dpi=150)
     plt.title(f"PP, t={i}, {N_living[i]}")
-    plt.scatter(x[i], y[i], s=4)
-    plt.scatter(zx[i], zy[i], color="r", s=4)
+    plt.scatter(x[i], y[i], s=6)
+    plt.scatter(zx[i], zy[i], color="r", s=6)
     plt.quiver(x[i], y[i], fx[i] , fy[i])
     plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
     plt.xlim(0,1.2)
