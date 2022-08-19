@@ -308,12 +308,12 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat=0.05, boundary="stop"):
 
 
 #%% Test animation function
-ani_func(N=3, L=1, t_end=1, dt=0.01, a=1, b=1, c=1, p=2.5, boundary="periodic")
+ani_func(N=10, L=1, t_end=1, dt=0.05, a=1, b=1, c=1, p=2.5, boundary="periodic")
 
 #%%
 def plot_quiver():
     # Normalize vector fx, fy...
-    x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
+    x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=1, L=1, t_end=2, dt=0.01, a=1, b=1, c=1, p=2.5, boundary="periodic")
     for i in range(len(x)):
         f_len = np.sqrt(fx[i]**2 + fy[i]**2)
         fz_len = np.sqrt(fzx[i]**2 + fzy[i]**2)
@@ -329,6 +329,6 @@ def plot_quiver():
         plt.scatter(zx[i], zy[i], color="r", s=4)
         plt.quiver(x[i], y[i], fx[i] , fy[i])
         plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
-        plt.xlim(-1.2,1.2)
-        plt.ylim(-1.2,1.2)
-#plot_quiver()
+        plt.xlim(0,1)
+        plt.ylim(0,1)
+plot_quiver()
