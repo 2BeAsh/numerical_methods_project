@@ -207,12 +207,6 @@ def movement(N, L, t_end, dt, a, b, c, p):
         zx = zx + fzx * dt
         zy = zy + fzy * dt
 
-        # Create square boundary which the particles cannot escape
-        x = np.clip(x, -1, 1)
-        y = np.clip(y, -1, 1)
-        zx = np.clip(zx, -1, 1)
-        zy = np.clip(zy, -1, 1)
-
         # Set speed equal to zero at boundaries
         # THIS MIGHT BE EASIER - fx = np.where(x > 0.99 or x<-0.99, 0, x)
         fx[x<=-0.99] = 0
@@ -222,7 +216,11 @@ def movement(N, L, t_end, dt, a, b, c, p):
         fzx = np.where(zx>0.99 or fzx>-0.99, 0, fzx) # Able to use "or" because fzx is float and not array like fx
         fzy = np.where(zy>0.99 or fzy>-0.99, 0, fzy)
 
-        # REMEMBER TO ADD PREDATOR HERE
+        # Create square boundary which the particles cannot escape
+        x = np.clip(x, -1, 1)
+        y = np.clip(y, -1, 1)
+        zx = np.clip(zx, -1, 1)
+        zy = np.clip(zy, -1, 1)
 
         # Eat prey by calculating distance from prey to pred and comparing to eat radius, and then removing prey inside eat radius
         r_min = 0.05 # Predator eats prey within this radius
