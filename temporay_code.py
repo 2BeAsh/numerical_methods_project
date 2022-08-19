@@ -79,7 +79,72 @@ import scipy as sp
 from scipy import sparse
 from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
+#%%
 
+def force(t, coord, a, b, c, p):
+    """
+    Parameters
+    ----------
+    t : float
+        Time
+    coord : Tuple of two 1darrays each with two 1darrays
+        first element is prey coordinates [x, y] and second is predator coordinates [zx, zy]
+    a : float
+        Prey Attraction paramater.
+    b : float
+        Predator's repulsion on prey paramater.
+    c : float
+        Efficiency of predator parameter
+    p : float
+        Predator parameter
+
+    Returns
+    -------
+    fx : 1darray
+        Each prey particle´s derivative in the x-direction
+    fy : 1darray
+        Each prey particle´s derivative in the y-direction
+    fzx: 1darray
+        The predator´s derivative in the x-direction
+    fzy: 1darray
+        The predator´s derivative in the y-direction
+
+    """
+
+    prey_coord, predator_coord = coord
+    x, y = prey_coord
+    zx, zy = predator_coord
+    N = x.size
+    fx, fy = np.empty(N), np.empty(N) # Empty derivative arrays to be updated
+    
+    # For each element in x and y, calculate its derivative
+    for j in range(N): # IF WE CAN DO THIS WITHOUT A LOOP IT WOULD BE GREAT
+        # Exclude k = j
+        idx = np.where(x != x[j]) # Same index for both x and y
+        x_k = x[idx]
+        y_k = y[idx]
+
+        dist_prey_p2 = (x[j] - x_k)**2 + (y[j] - y_k)**2 # Distance between prey and prey squared
+        dist_prey_p2 = np.where(dist_prey_p2 == 0, 0.05, dist_prey_p2) # Add minimum distance between particles
+
+        dist_predator = ((x[j] - zx)**2 + (y[j] - zy)**2)**(1/2) # Distance between prey and predator
+        # dist_predator = np.where(dist_predator == 0, 0.05, dist_predator)
+
+        x_expr  = (x[j] - x_k) / dist_prey_p2 - a * (x[j] - x_k)  # Expression inside sum in Equation 1.1 in Y. Chen
+        y_expr  = (y[j] - y_k) / dist_prey_p2 - a * (y[j] - y_k) 
+
+        # Append
+        fx[j]  = 1 / N * np.sum(x_expr) + b * (x[j] - zx) / dist_predator**2
+        fy[j]  = 1 / N * np.sum(y_expr) + b * (y[j] - zy) / dist_predator**2
+
+    # Predator - No need for loop since only 1 particle IF WE NEED MULTIPLE PREDATORS, WE NEED A SEPERATE LOOP FOR THIS
+    # Since predator and prey may colide, add minimal distance
+    dist_loc = ((x - zx)**2 + (y - zy)**2)**(1/2)
+    # dist_loc = np.where(dist_loc == 0, 0.05, dist_loc)
+    fzx = c / N * np.sum((x - zx) / dist_loc**p)
+    fzy = c / N * np.sum((y - zy) / dist_loc**p)
+
+    return fx, fy, fzx, fzy
 
 #%% Vores tilfælde
 def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.01, r0=0.1):
@@ -97,10 +162,13 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.01, r0=0.1):
 
     dist_prey_pred = (x - zx)**2 + (y - zy)**2
     dist_xy_p2     = (xj - xk)**2 + (yj - yk)**2
+    
+    # Prey dislike eachother a bit more for higher d
+    d = 2
 
     # Get x and y specific, set terms with distance 0 equal to 0
-    div_term_x = np.divide(xj - xk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
-    div_term_y = np.divide(yj - yk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
+    div_term_x = d*np.divide(xj - xk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
+    div_term_y = d*np.divide(yj - yk, dist_xy_p2, out=np.zeros((N,N), dtype=float), where=dist_xy_p2!=0)
 
     #div_term_x = np.where(dist_xy_p2 == 0, 0, (xj - xk) / dist_xy_p2)
     #div_term_y = np.where(dist_xy_p2 == 0, 0, (yj - yk) / dist_xy_p2)
@@ -114,25 +182,28 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.01, r0=0.1):
     fzx = c / N * np.sum((x - zx) / dist_prey_pred**(p/2)) # Divide p by 2 because normally squared
     fzy = c / N * np.sum((y - zy) / dist_prey_pred**(p/2))
 
+    epsilon = 0.05
+    if (x<=0 + epsilon or x>=0.99*L- epsilon or y<=0 + epsilon or y>=0.99*L- epsilon):
+        
+        theta = np.arctan(fy/fx)
+        pos = np.empty((N,2))
+        pos[:, 0] = x
+        pos[:, 1] = y
+        pos = np.clip(pos, 0, 0.99*L)
+        tree = KDTree(pos, boxsize=[L+1,L+1])
+        dist = tree.sparse_distance_matrix(tree, max_distance=r0, output_type="coo_matrix")
+        data = np.exp(theta[dist.col]*1j)
+        neigh = sparse.coo_matrix((data, (dist.row, dist.col)), shape=dist.get_shape())
+        S = np.squeeze(np.asarray(neigh.tocsr().sum(axis=1)))
+    
+        theta_ny = np.angle(S) + eta * np.random.uniform(-np.pi, np.pi, size=N)
+        theta_rot = theta_ny - theta
+        fx_rot = fx * np.cos(theta_rot) - fy * np.sin(theta_rot)
+        fy_rot = fx * np.sin(theta_rot) + fy * np.cos(theta_rot)
 
-    # Tree xy
-    theta = np.arctan(fy/fx)
-    pos = np.empty((N,2))
-    pos[:, 0] = x
-    pos[:, 1] = y
-    pos = np.clip(pos, 0, 0.99*L)
-    tree = KDTree(pos, boxsize=[L+1,L+1])
-    dist = tree.sparse_distance_matrix(tree, max_distance=r0, output_type="coo_matrix")
-    data = np.exp(theta[dist.col]*1j)
-    neigh = sparse.coo_matrix((data, (dist.row, dist.col)), shape=dist.get_shape())
-    S = np.squeeze(np.asarray(neigh.tocsr().sum(axis=1)))
-
-    theta_ny = np.angle(S) + eta * np.random.uniform(-np.pi, np.pi, size=N)
-    theta_rot = theta_ny - theta
-    fx_rot = fx * np.cos(theta_rot) - fy * np.sin(theta_rot)
-    fy_rot = fx * np.sin(theta_rot) + fy * np.cos(theta_rot)
-
-    return fx_rot, fy_rot, fzx, fzy
+        return fx_rot, fy_rot, fzx, fzy
+    else:
+        return fx, fy, fzx, fzy
 
 
 #%% Create movement of prey and predator
@@ -183,9 +254,9 @@ def movement(N, L, t_end, dt, a, b, c, p):
         # Set speed equal to zero at boundaries
         # THIS MIGHT BE EASIER - fx = np.where(x > 0.99 or x<-0.99, 0, x)
         fx[x<=0] = 0
-        fx[x>=L*0.99] = 0
+        fx[x>L*0.99] = 0
         fy[y<=0] = 0
-        fy[y>=L*0.99] = 0
+        fy[y>L*0.99] = 0
         fzx = np.where(zx>0.99*L or zx>0.01, 0, fzx) # Able to use "or" because fzx is float and not array like fx
         fzy = np.where(zy>0.99*L or zy>0.01, 0, fzy)
 
@@ -276,7 +347,7 @@ pred_coord = (0.11, 0.11)
 #fx, fy, fzx, fzy = force_vel(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=0.1)
 
 
-x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=N, L=1, t_end=1, dt=0.01, a=1.2, b=0.2, c=3, p=2.5)
+x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=N, L=1, t_end=2, dt=0.01, a=1.2, b=0.2, c=3, p=2.5)
 #ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy), dt=0.2)
 
 #%%
@@ -295,8 +366,8 @@ for i in range(len(x)):
     plt.figure(dpi=150)
     plt.title(f"PP, t={i}, {N_living[i]}")
     plt.scatter(x[i], y[i], s=6)
-    plt.scatter(zx[i], zy[i], color="r", s=6)
+    plt.scatter(zx[i], zy[i], color="r", s=9)
     plt.quiver(x[i], y[i], fx[i] , fy[i])
     plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
-    plt.xlim(0,1.2)
-    plt.ylim(0,1.2)
+    plt.xlim(0,1)
+    plt.ylim(0,1)
