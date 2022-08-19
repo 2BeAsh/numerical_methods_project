@@ -219,8 +219,8 @@ def movement(N, L, t_end, dt, a, b, c, p):
         fx[x>=0.99] = 0
         fy[y<=-0.99] = 0
         fy[y>=0.99] = 0
-        fzx = np.where(fzx>0.99 or fzx>-0.99, 0, fzx) # Able to use "or" because fzx is float and not array like fx
-        fzy = np.where(fzy>0.99 or fzy>-0.99, 0, fzy)
+        fzx = np.where(zx>0.99 or fzx>-0.99, 0, fzx) # Able to use "or" because fzx is float and not array like fx
+        fzy = np.where(zy>0.99 or fzy>-0.99, 0, fzy)
 
         # REMEMBER TO ADD PREDATOR HERE
 
