@@ -278,3 +278,15 @@ pred_coord = (0.11, 0.11)
 
 x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=N, L=1, t_end=5, dt=0.05, a=1, b=1, c=2.2, p=3)
 ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy), dt=0.2)
+
+#%%
+
+for i in range(len(x)):
+    plt.figure(dpi=150)
+    plt.title(f"PP, t={i}, {N_living[i]}")
+    plt.scatter(x[i], y[i], s=4)
+    plt.scatter(zx[i], zy[i], color="r", s=4)
+    plt.quiver(x[i], y[i], fx[i] , fy[i])
+    plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
+    plt.xlim(0,1.2)
+    plt.ylim(0,1.2)
