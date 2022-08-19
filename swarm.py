@@ -72,7 +72,7 @@ def force(t, coord, a, b, c, p):
 
     return fx, fy, fzx, fzy
 
-#%% Getting rid of the for loop - Temporary
+#%% Getting rid of the for loop -
 def force_no_loop(t, coord, a, b, c, p):
     prey_coord, pred_coord = coord
     x, y = prey_coord
@@ -106,7 +106,14 @@ def force_no_loop(t, coord, a, b, c, p):
     fzy = c / N * np.sum((y - zy) / dist_prey_pred**(p/2))
     return fx, fy, fzx, fzy
 
-
+#%%
+xx = np.linspace(0.11, 10, 10)
+yy = np.linspace(0.41, 15.11, 10)
+print("hej!!!!!!!!!!!!!!!!!!!!!!!")
+print(force_no_loop(t=0, coord = ((xx,yy), (0.1,0.1)), a=1, b=1, c=1, p=1 ))
+print("skift")
+print(force(t=0, coord = ((xx,yy), (0.1,0.1)), a=1, b=1, c=1, p=1 ))
+print("slut")
 #%% Create movement of prey and predator
 def movement(N, L, t_end, dt, a, b, c, p):
     """
