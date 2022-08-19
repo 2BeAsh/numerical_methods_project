@@ -276,11 +276,12 @@ pred_coord = (0.11, 0.11)
 #fx, fy, fzx, fzy = force_vel(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=0.1)
 
 
-x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=N, L=1, t_end=1, dt=0.01, a=1.2, b=0.2, c=0.1, p=2.5)
+x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=N, L=1, t_end=1, dt=0.01, a=1.2, b=0.2, c=3, p=2.5)
 #ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy), dt=0.2)
 
 #%%
 # Normalize vector fx, fy...
+"""
 for i in range(len(x)):
     f_len = np.sqrt(fx[i]**2 + fy[i]**2)
     fz_len = np.sqrt(fzx[i]**2 + fzy[i]**2)
@@ -288,7 +289,7 @@ for i in range(len(x)):
     fy[i] = fy[i]/f_len
     fzx[i] = fzx[i]/fz_len
     fzy[i] = fzy[i]/fz_len
-
+"""
 
 for i in range(len(x)):
     plt.figure(dpi=150)
