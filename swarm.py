@@ -40,9 +40,6 @@ def force(t, coord, a, b, c, p):
     prey_coord, predator_coord = coord
     x, y = prey_coord
     zx, zy = predator_coord
-
-
-
     N = x.size
     fx, fy = np.empty(N), np.empty(N) # Empty derivative arrays to be updated
 
@@ -245,24 +242,28 @@ def movement(N, L, t_end, dt, a, b, c, p):
 
 
 #%% Animation function
-def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L=1):
+def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L):
     # Set up figure and axis
     fig, ax = plt.subplots(dpi=125)
-    ax.set(xlim=(-2, 2), ylim=(-2, 2))
+    ax.set(xlim=(-L-1, L+1), ylim=(-L-1, L+1))
 
     # Get data
     x_list, y_list = prey_list
     zx_list, zy_list = pred_list
     fx_list, fy_list = prey_deriv_list
     fzx_list, fzy_list = pred_deriv_list
+    
+    # Fill in NANs
+    
+    
 
     # First line
     scat_prey = ax.scatter(x_list[0], y_list[0], color="b", s=2)
     scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")
-    #quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0]) # Documentation says quiver([X, Y], U, V), but we have quiver(X, Y, U, V)
+    quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0]) # Documentation says quiver([X, Y], U, V), but we have quiver(X, Y, U, V)
 
     # Boundary Box
-    ax.plot([-L, -L, L, L, -L], [-L, L, L, -L, -L], "k--")
+    ax.plot([-L, -L, L, L, -L], [-L, L, L, -L, -L], "k--") #OBS UPDATE WHEN TREE
 
     # Labels
     label_eat = ax.text(1.9, 1.6, "Prey Eaten: 0", ha="right", va="center", fontsize=12)
@@ -275,12 +276,12 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L=1):
         scat_pred.set_offsets(np.c_[zx_list[i], zy_list[i]])
 
         # Update quiver
-       # print("x:", x_list[i].size)
-        #print("y:", y_list[i].size)
-        #print("fx:", fx_list[i].size)
-        #print("fy:", fy_list[i].size)
-        #quiv.set_offsets(np.c_[x_list[i], y_list[i]]) #
-        #quiv.set_UVC(fx_list[i], fy_list[i]) # Has a problem when prey are eaten
+        print("x:", x_list[i].size)
+        print("y:", y_list[i].size)
+        print("fx:", fx_list[i].size)
+        print("fy:", fy_list[i].size, flush=True)
+        quiv.set_offsets(np.c_[x_list[i], y_list[i]]) #
+        quiv.set_UVC(fx_list[i], fy_list[i]) # Has a problem when prey are eaten
 
         # Update labels
         prey_eat = len(x_list[0]) - len(x_list[i])
@@ -300,25 +301,26 @@ ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy), dt=0.2)
 
 
 #%%
-
-# Normalize vector fx, fy...
-for i in range(len(x)):
-    f_len = np.sqrt(fx[i]**2 + fy[i]**2)
-    fz_len = np.sqrt(fzx[i]**2 + fzy[i]**2)
-    fx[i] = fx[i]/f_len
-    fy[i] = fy[i]/f_len
-    fzx[i] = fzx[i]/fz_len
-    fzy[i] = fzy[i]/fz_len
-
-
-
-
-for i in range(len(x)):
-    plt.figure(dpi=150)
-    plt.title(f"PP, t={i}, {N_living[i]}")
-    plt.scatter(x[i], y[i], s=4)
-    plt.scatter(zx[i], zy[i], color="r", s=4)
-    plt.quiver(x[i], y[i], fx[i] , fy[i])
-    plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
-    plt.xlim(-1.2,1.2)
-    plt.ylim(-1.2,1.2)
+def plot_quiver():
+    # Normalize vector fx, fy...
+    for i in range(len(x)):
+        f_len = np.sqrt(fx[i]**2 + fy[i]**2)
+        fz_len = np.sqrt(fzx[i]**2 + fzy[i]**2)
+        fx[i] = fx[i]/f_len
+        fy[i] = fy[i]/f_len
+        fzx[i] = fzx[i]/fz_len
+        fzy[i] = fzy[i]/fz_len
+    
+    
+    
+    
+    for i in range(len(x)):
+        plt.figure(dpi=150)
+        plt.title(f"PP, t={i}, {N_living[i]}")
+        plt.scatter(x[i], y[i], s=4)
+        plt.scatter(zx[i], zy[i], color="r", s=4)
+        plt.quiver(x[i], y[i], fx[i] , fy[i])
+        plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
+        plt.xlim(-1.2,1.2)
+        plt.ylim(-1.2,1.2)
+#plot_quiver()
