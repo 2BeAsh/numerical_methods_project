@@ -178,8 +178,8 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
     fx = np.random.uniform(-1, 1,size=N) 
     fy = np.random.uniform(-1, 1,size=N) 
 
-    zx = 0.3 * L # Predator starts slightly south west of center
-    zy = 0.3 * L
+    zx = 0.8 * L # Predator starts slightly south west of center
+    zy = 0.2 * L
     x_list = [x]
     y_list = [y]
     fx_list = [fx]
@@ -303,14 +303,16 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat, eta, r0, boundary="stop"):
    
             
     # First line
-    scat_prey = ax.scatter(x_list[0], y_list[0], color="b", s=2)
+    scat_prey = ax.scatter(x_list[0], y_list[0], color="b", s=3)
     scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")
     quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0] )
     
     
     # Boundary Box
-    ax.plot([0, 0, L, L, 0], [0, L, L, 0, 0], "k--") 
-
+    ax.plot([0, 0, L, L, 0], [0, L, L, 0, 0], linewidth=1.5, color="darkgreen") 
+    ax.axes.xaxis.set_ticklabels([])
+    ax.axes.yaxis.set_ticklabels([])
+    ax.axis('off')
   
 
     # Update line function
@@ -325,16 +327,18 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat, eta, r0, boundary="stop"):
 
         # Update labels
         prey_eat = np.count_nonzero(np.isnan(x_list[i]))
-        ax.set_title(f'Dead prey:{prey_eat}, Time:{np.round(i * dt, 2)}', loc='left')
-        
-
-    anim = FuncAnimation(fig, animation, interval= t_end*0.9, frames=len(x_list))
+        prey = np.count_nonzero(~np.isnan(x_list[i]))
+        ax.set_title(f'Alive prey: {prey}, Dead prey: {prey_eat}, Time: {np.round(i * dt, 2)}', loc='left')
+        ax.axes.xaxis.set_ticklabels([])
+        ax.axes.yaxis.set_ticklabels([])
+        ax.set_axis_off()
+    anim = FuncAnimation(fig, animation, interval= t_end , frames=len(x_list))
     anim.save("animation_3.mp4")
     #plt.draw()
     #plt.show()
 
 #%% Test animation function
-ani_func(N=300, L=2, t_end=15, dt=0.01, a=1, b=0.5, c=5, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+ani_func(N=300, L=2, t_end=20, dt=0.01, a=1, b=0.7, c=6, p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
 
 #%%
 def plot_quiver():
