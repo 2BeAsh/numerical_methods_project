@@ -1,6 +1,7 @@
 #%% Imports
 import numpy as np
 import scipy as sp
+import random
 from scipy import sparse
 from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
@@ -107,7 +108,7 @@ def force_no_loop(t, coord, a, b, c, p):
     return fx, fy, fzx, fzy
 
 #%% Velocity Force
-def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
+def force_vel(t, coord, a, b, c, p, L, eta, r0):
     prey_coord, pred_coord = coord
     x, y = prey_coord
     zx, zy = pred_coord
@@ -145,7 +146,7 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
     pos = np.empty((N,2))
     pos[:, 0] = x
     pos[:, 1] = y
-    tree = KDTree(pos, boxsize=[L,L])
+    tree = KDTree(pos, boxsize=[L+0.01,L+0.01])
     dist = tree.sparse_distance_matrix(tree, max_distance=r0, output_type="coo_matrix")
     data = np.exp(theta[dist.col]*1j)
     neigh = sparse.coo_matrix((data, (dist.row, dist.col)), shape=dist.get_shape())
@@ -160,7 +161,9 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
 
 
 #%% Create movement of prey and predator
-def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
+
+    
+def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
     """
     N: int - Amount of prey
     L: float - Starting area which prey can be in
@@ -172,8 +175,8 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
     t_vals = np.arange(0, t_end, dt)
     x = np.random.uniform(low=0, high=L, size=N)
     y = np.random.uniform(low=0, high=L, size=N)
-    fx = np.random.random(size=N)
-    fy = np.random.random(size=N) # Should this be 0?
+    fx = np.random.uniform(-1, 1,size=N) 
+    fy = np.random.uniform(-1, 1,size=N) 
 
     zx = 0.3 * L # Predator starts slightly south west of center
     zy = 0.3 * L
@@ -194,7 +197,7 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
         # Get and update values
         prey_coord = [x, y]
         predator_coord = [zx, zy]
-        fx, fy, fzx, fzy = force_no_loop(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p)
+        fx, fy, fzx, fzy = force_vel(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p, L=L, eta=eta, r0=r0)
         x = x + fx * dt
         y = y + fy * dt
         zx = zx + fzx * dt
@@ -202,18 +205,18 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
         
         if boundary == "stop":
             # Stop particles and set their speed equal to zero at boundaries
-            fx[x < 0.01 * L] = 0
-            fx[x > 0.99 * L] = 0
-            fy[y < 0.01 * L] = 0
-            fy[y > 0.99 * L] = 0
-            fzx = np.where(zx>0.99*L or fzx>0.01*L, 0, fzx) # Able to use "or" because fzx is float and not array like fx
-            fzy = np.where(zy>0.99*L or fzy>-0.01*L, 0, fzy)
+            fx[x < 0.001 * L] = -fx[x < 0.001 * L]
+            fx[x >= 0.99 * L] = -fx[x >= 0.99 * L]
+            fy[y < 0.001 * L] = -fy[y < 0.001 * L]
+            fy[y >= 0.99 * L] = -fy[y >= 0.99 * L]
+            fzx = np.where(zx>0.99*L or fzx>0.001*L, 0, fzx) # Able to use "or" because fzx is float and not array like fx
+            fzy = np.where(zy>0.99*L or fzy>-0.001*L, 0, fzy)
     
             # Create square boundary which the particles cannot escape
-            x = np.clip(x, 0, 0.99*L)
-            y = np.clip(y, 0, 0.99*L)
-            zx = np.clip(zx, 0, 0.99*L)
-            zy = np.clip(zy, 0, 0.99*L)
+            x = np.clip(x, 0, L)
+            y = np.clip(y, 0, L)
+            zx = np.clip(zx, 0, L)
+            zy = np.clip(zy, 0, L)
 
 
         if boundary == "periodic":
@@ -255,31 +258,60 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
 
         
     return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list
+#%%
 
 #%% Animation function
-def ani_func(N, L, t_end, dt, a, b, c, p, r_eat=0.05, boundary="stop"):
+def ani_func(N, L, t_end, dt, a, b, c, p, r_eat, eta, r0, boundary="stop"):
     # Set up figure and axis
     fig, ax = plt.subplots(dpi=125)
-    ax.set(xlim=(0, L+1), ylim=(0, L+1))
+    ax.set(xlim=(0, L), ylim=(0, L))
 
     # Get data from movement function
-    x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat)
+    x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+    x_len_start = len(x_list[0])
+    max_vel_list_x = np.empty(len(x_list))
+ 
+    
+    print("Jeg animerer lige nu. Vent et øjeblik")
     
     # Fill in NANs
-    
-    
+    for i in range(len(x_list)):
+        if len(x_list[i]) < x_len_start:
+            x_len_diff = x_len_start - len(x_list[i])
+            max_velocity_x = sorted(fx_list[i])[70]
 
+            
+           
+            a = [np.nan] * x_len_diff
+                        
+            x_list[i] = x_list[i].tolist()
+            y_list[i] = y_list[i].tolist()
+            fx_list[i] = fx_list[i].tolist()
+            fy_list[i] = fy_list[i].tolist()
+
+            
+            x_list[i].extend(a)
+            y_list[i].extend(a)
+            fx_list[i].extend(a)
+            fy_list[i].extend(a)
+    
+    max_velocity_x = sorted(max_vel_list_x)[-10]
+
+    
+    fx_list = np.clip(fx_list, -1, 1)
+    fy_list = np.clip(fy_list, -1, 1)
+   
+            
     # First line
     scat_prey = ax.scatter(x_list[0], y_list[0], color="b", s=2)
     scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")
-    #quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0]) # Documentation says quiver([X, Y], U, V), but we have quiver(X, Y, U, V)
-
+    quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0] )
+    
+    
     # Boundary Box
-    ax.plot([0, 0, L, L, 0], [0, L, L, 0, 0], "k--") #OBS UPDATE WHEN TREE
+    ax.plot([0, 0, L, L, 0], [0, L, L, 0, 0], "k--") 
 
-    # Labels
-    label_eat = ax.text(L, 0.95*L, "Prey Eaten: 0", ha="right", va="center", fontsize=12)
-    label_time = ax.text(L, 0.85*L, "Time: 0", ha="right", va="center", fontsize=12)
+  
 
     # Update line function
     def animation(i):
@@ -288,27 +320,21 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat=0.05, boundary="stop"):
         scat_pred.set_offsets(np.c_[zx_list[i], zy_list[i]])
 
         # Update quiver
-        #print("x:", x_list[i].size)
-        #print("y:", y_list[i].size)
-        #print("fx:", fx_list[i].size)
-        #print("fy:", fy_list[i].size, flush=True)
-        #quiv.set_offsets(np.c_[x_list[i], y_list[i]]) #
-        #quiv.set_UVC(fx_list[i], fy_list[i]) # Has a problem when prey are eaten
+        quiv.set_offsets(np.c_[x_list[i], y_list[i]])
+        quiv.set_UVC(fx_list[i], fy_list[i]) 
 
         # Update labels
-        prey_eat = len(x_list[0]) - len(x_list[i])
-        time_count_str = "Time: " + str(round(i * dt, 1))
-        label_eat.set_text(f"Prey Eaten: {prey_eat}")
-        label_time.set_text(time_count_str)
+        prey_eat = np.count_nonzero(np.isnan(x_list[i]))
+        ax.set_title(f'Dead prey:{prey_eat}, Time:{np.round(i * dt, 2)}', loc='left')
+        
 
-    anim = FuncAnimation(fig, animation, interval=125, frames=len(x_list))
-    anim.save("animation.mp4")
+    anim = FuncAnimation(fig, animation, interval= t_end*0.9, frames=len(x_list))
+    anim.save("animation_3.mp4")
     #plt.draw()
     #plt.show()
 
-
 #%% Test animation function
-ani_func(N=10, L=1, t_end=1, dt=0.05, a=1, b=1, c=1, p=2.5, boundary="periodic")
+ani_func(N=300, L=2, t_end=15, dt=0.01, a=1, b=0.5, c=5, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
 
 #%%
 def plot_quiver():
@@ -331,4 +357,4 @@ def plot_quiver():
         plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
         plt.xlim(0,1)
         plt.ylim(0,1)
-plot_quiver()
+#plot_quiver()
