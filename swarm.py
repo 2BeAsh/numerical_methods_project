@@ -6,6 +6,7 @@ from scipy import sparse
 from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from scipy.signal import find_peaks
 
 #%% Forces
 def force(t, coord, a, b, c, p):
@@ -339,6 +340,99 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat, eta, r0, boundary="stop"):
 
 #%% Test animation function
 ani_func(N=300, L=2, t_end=20, dt=0.01, a=1, b=0.7, c=6, p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+#%%
+def pred_bane(N, L, t_end, dt, a, b, c_list, p, boundary, r_eat, eta, r0):
+    for c in c_list:
+        
+        x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+        plt.figure()
+        plt.plot(zx_list[1700:], zy_list[1700:], ".")
+        plt.xlim(1,6)
+        plt.ylim(1,6)
+        plt.show()
+
+
+pred_bane(N=300, L=6, t_end=30, dt=0.01, a=1, b=0.7, c_list=[0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 1, 1.5, 2, 3, 4,4.5, 5,5.5, 6,6.5,7 ], p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+
+#%%
+def pred_bane_x(N, L, t_end, dt, a, b, c_list, p, boundary, r_eat, eta, r0):
+
+    
+    peak_list=[]
+    minima_list=[]
+    #c_before_bifurcation = np.linspace(0.01, 3.3, 30)
+    #print("går i gang med første loop")
+    """
+    for c in c_before_bifurcation:
+        #t_list = np.linspace(0, t_end*10, 3000, endpoint=False)
+        t_list = np.linspace(0, t_end, 13000, endpoint=False)
+        t = t_end
+        x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N=N, L=L, t_end=t, dt=dt, a=a, b=b, c=c, p=p, boundary=boundary, r_eat=r_eat, eta=eta, r0=r0)
+        
+        print(np.array(zx_list)[-3:])
+        plt.figure()
+        plt.plot(t_list[:], zx_list[:-1], ".", markersize="3", label=f'c={c}')
+        plt.ylim(0,5)
+        plt.xlim(0,t_end)
+        plt.title('Predator movement (x-coordinate)')
+        plt.legend()
+        plt.xlabel('time/ s')
+        plt.ylabel('x-coordinate')
+        plt.show()
+    """    
+        
+    print("færdig med første loop")
+    
+    for c in c_list:
+        
+
+        x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+        zx_revers = np.array(zx_list[:-1])*-1
+        
+        minima,_= find_peaks(zx_revers, height=-5)
+        #print(zx_revers)
+        #print(minima)
+        peaks, _ = find_peaks(zx_list[:-1], height=2)
+        
+        
+        """
+        plt.figure()
+        plt.plot(t_list[:], zx_list[:-1], ".", markersize="3", label=f'c={c}')
+        plt.plot(np.array(t_list)[peaks], np.array(zx_list)[:-1][peaks], "x", markersize="7", label='Maxima')
+        plt.plot(np.array(t_list)[minima], np.array(zx_list)[:-1][minima], "x", markersize="7", label='Minima')
+       
+        plt.ylim(0,5)
+        plt.xlim(0,t_end)
+        plt.title('Predator movement (x-coordinate)')
+        plt.legend()
+        plt.xlabel('time/ s')
+        plt.ylabel('x-coordinate')
+        plt.show()
+        """
+        
+        peak_list.append(np.array(zx_list)[:-1][peaks][5:])
+        minima_list.append(np.array(zx_list)[:-1][minima][5:])
+    
+    print("går i gang med sidste loop")
+    c = ([ 1.03103, 1.44482, 1.25793, 1.371379, 1.4848,
+    1.5982, 1.71172, 1.8251, 1.9386, 2.0520, 2.1655, 2.27889, 2.3924,
+    2.50586, 2.6193, 2.7327, 2.8462, 2.9596, 3.0731, 3.18655, 3.211, 3.2995] )
+
+
+    x = sorted([ 2.1792, 1.6889, 1.62079, 1.3095, 1.362, 1.746,
+    1.3259, 1.5138, 1.4457, 1.8287, 1.7889, 2.0977, 1.88527, 2.0491,
+    2.33931, 1.7312, 1.8856, 2.0397, 2.20169, 2.442, 2.541, 2.665] )
+    plt.figure(figsize=(8, 6))
+    plt.scatter(c, x, color="black", s=6)
+    for x, y, z in zip(c_list, peak_list, minima_list):
+        plt.scatter([x] * len(y), y, color='black', s=6)
+        plt.scatter([x] * len(z), z, color='black', s=6)
+        plt.xlabel('c-value')
+        plt.ylabel('x')
+    plt.show()
+
+
+pred_bane_x(N=300, L=6, t_end=30, dt=0.02, a=1, b=0.7, c_list=np.linspace(3.35, 15, 150), p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
 
 #%%
 def plot_quiver():
@@ -362,3 +456,15 @@ def plot_quiver():
         plt.xlim(0,1)
         plt.ylim(0,1)
 #plot_quiver()
+
+#%%
+c = ([0.46379, 1.03103, 1.44482, 1.25793, 1.371379, 1.4848,
+1.5982, 1.71172, 1.8251, 1.9386, 2.0520, 2.1655, 2.27889, 2.3924,
+2.50586, 2.6193, 2.7327, 2.8462, 2.9596, 3.0731, 3.18655] )
+
+
+x = ([1.729,  2.1792, 1.6889, 1.62079, 1.3095, 1.262, 1.746,
+1.3259, 1.5138, 1.4457, 1.8287, 1.7889, 2.0977, 1.88527, 2.0491,
+2.33931, 1.7312, 1.8856, 2.0397, 2.20169, 2.442] )
+
+plt.plot(c, x)

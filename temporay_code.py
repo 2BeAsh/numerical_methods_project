@@ -3,6 +3,19 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 #%%
+c = ([0.46379, 1.03103, 1.44482, 1.25793, 1.371379, 1.4848,
+1.5982, 1.71172, 1.8251, 1.9386, 2.0520, 2.1655, 2.27889, 2.3924,
+2.50586, 2.6193, 2.7327, 2.8462, 2.9596, 3.0731, 3.18655] )
+
+
+x = sorted([1.729,  2.1792, 1.6889, 1.62079, 1.3095, 1.262, 1.746,
+1.3259, 1.5138, 1.4457, 1.8287, 1.7889, 2.0977, 1.88527, 2.0491,
+2.33931, 1.7312, 1.8856, 2.0397, 2.20169, 2.442] )
+plt.figure(figsize=(8, 6))
+plt.plot(c, x, ".")
+plt.scatter(c,x, color="black")
+plt.show()
+#%%
 
 def force_no_loop(t, coord, a, b, c, p):
     prey_coord, pred_coord = coord
