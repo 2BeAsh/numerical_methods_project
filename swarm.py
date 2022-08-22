@@ -3,6 +3,7 @@ import numpy as np
 import scipy as sp
 import random
 from scipy import sparse
+
 from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -260,6 +261,58 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
         
     return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list
 #%%
+def count_dead(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
+        
+        dead_list=[]
+        t_list = np.linspace(0, t_end, 2001)
+        print('start med loops')
+        
+        for n in range(50):
+            x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+            x_len_start = len(x_list[0])
+            for i in range(len(x_list)):
+                dead = x_len_start-len(x_list[i])
+                dead_list.append(dead)
+                
+        dead_list = np.array(dead_list) 
+        
+        dead_list = np.reshape(dead_list, (50, int(len(x_list))), order='A')
+        
+        dead_list = np.mean(np.array(dead_list), axis=0)  
+        
+        print('done med loops')
+        
+        return dead_list, t_list
+
+dead_listc1, t_range1 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=4, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+dead_listc2, t_range2 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=6, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+dead_listc3, t_range3 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=7, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+dead_listc4, t_range4 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=8, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+dead_listc5, t_range5 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=9, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+
+#%%
+plt.figure()
+plt.step(t_range1,dead_listc1, label="c=4")
+plt.step(t_range2,dead_listc2, label="c=6")
+plt.step(t_range3,dead_listc3, label="c=7")
+plt.step(t_range4,dead_listc4, label="c=8")
+plt.step(t_range5,dead_listc5, label="c=9")
+plt.title("Prey eaten over time for different c, averaged over 50 runs")
+plt.xlabel('time')
+plt.ylabel('Prey eaten')
+plt.legend()
+plt.show()
+#%%
+
+
+
+
+#%%
+a= np.array([1,2,3, 1,2,3])
+a = np.reshape(a, (2,3))
+print(a)
+a = np.mean(a, axis=0)
+print(a)
 
 #%% Animation function
 def ani_func(N, L, t_end, dt, a, b, c, p, r_eat, eta, r0, boundary="stop"):
@@ -333,13 +386,13 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat, eta, r0, boundary="stop"):
         ax.axes.xaxis.set_ticklabels([])
         ax.axes.yaxis.set_ticklabels([])
         ax.set_axis_off()
-    anim = FuncAnimation(fig, animation, interval= t_end , frames=len(x_list))
-    anim.save("animation_3.mp4")
+    anim = FuncAnimation(fig, animation, interval= t_end*0.9 , frames=len(x_list))
+    anim.save("animation_ny.mp4")
     #plt.draw()
     #plt.show()
 
 #%% Test animation function
-ani_func(N=300, L=2, t_end=20, dt=0.01, a=1, b=0.7, c=6, p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+ani_func(N=300, L=2, t_end=20, dt=0.01, a=1, b=0.7, c=6.8, p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
 #%%
 def pred_bane(N, L, t_end, dt, a, b, c_list, p, boundary, r_eat, eta, r0):
     for c in c_list:
@@ -352,7 +405,7 @@ def pred_bane(N, L, t_end, dt, a, b, c_list, p, boundary, r_eat, eta, r0):
         plt.show()
 
 
-pred_bane(N=300, L=6, t_end=30, dt=0.01, a=1, b=0.7, c_list=[0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 1, 1.5, 2, 3, 4,4.5, 5,5.5, 6,6.5,7 ], p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+#pred_bane(N=300, L=6, t_end=30, dt=0.01, a=1, b=0.7, c_list=[0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 1, 1.5, 2, 3, 4,4.5, 5,5.5, 6,6.5,7 ], p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
 
 #%%
 def pred_bane_x(N, L, t_end, dt, a, b, c_list, p, boundary, r_eat, eta, r0):
@@ -432,7 +485,7 @@ def pred_bane_x(N, L, t_end, dt, a, b, c_list, p, boundary, r_eat, eta, r0):
     plt.show()
 
 
-pred_bane_x(N=300, L=6, t_end=30, dt=0.02, a=1, b=0.7, c_list=np.linspace(3.35, 15, 150), p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+#pred_bane_x(N=300, L=6, t_end=30, dt=0.02, a=1, b=0.7, c_list=np.linspace(3.35, 15, 150), p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
 
 #%%
 def plot_quiver():
