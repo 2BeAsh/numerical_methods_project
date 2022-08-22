@@ -1,12 +1,12 @@
 # -- UNITY IGNORE -- 
-[Ll]ibrary/
-[Uu]serSettings/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-[Ll]ogs/
-[Mm]emoryCaptures/
+/PredatorPreyGame/[Ll]ibrary/
+/PredatorPreyGame/[Uu]serSettings/
+/PredatorPreyGame/[Tt]emp/
+/PredatorPreyGame/[Oo]bj/
+/PredatorPreyGame/[Bb]uild/
+/PredatorPreyGame/[Bb]uilds/
+/PredatorPreyGame/[Ll]ogs/
+/PredatorPreyGame/[Mm]emoryCaptures/
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # [Aa]ssets/AssetStoreTools*
