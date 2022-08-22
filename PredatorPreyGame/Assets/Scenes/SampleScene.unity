@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 161039558}
   - component: {fileID: 161039557}
   - component: {fileID: 161039556}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: CollisionObjects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1480,6 +1480,7 @@ MonoBehaviour:
     minNormalAngle: 0
     maxNormalAngle: 0
   collisionOffset: 0.0005
+  layer: 6
 --- !u!4 &907712761
 Transform:
   m_ObjectHideFlags: 0
@@ -4480,7 +4481,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectToSpawn: {fileID: 240586122}
   spawnRadius: 0.9
-  numberToSpawn: 100
+  numberToSpawn: 10
 --- !u!4 &1738860644
 Transform:
   m_ObjectHideFlags: 0
