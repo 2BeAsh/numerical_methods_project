@@ -314,7 +314,7 @@ def where_dead(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
         #t_list = np.linspace(0, t_end, 2001)
         print('start med loops')
         
-        for n in range(20):
+        for n in range(30):
             x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
             x_len_start = len(x_list[0])
             for i in range(len(x_list)):
@@ -337,24 +337,24 @@ def where_dead(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
 #%%
 
 def plot_where_dead():
-    L_list = np.linspace(1.2, 4, 37)
+    L_list = np.linspace(1.2, 4, 50)
     corner_list=[]
     middle_list=[]
     edge_list=[]
     for L in L_list:
-        corner, middle, edge = where_dead(N=200, L=L, t_end=30, dt=0.03, a=1, b=0.5, c=9.5, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+        corner, middle, edge = where_dead(N=200, L=L, t_end=40, dt=0.03, a=1, b=0.5, c=9.5, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
         total = corner + middle + edge
         corner_list.append(corner/total)
         middle_list.append(middle/total)
         edge_list.append(edge/total)
     
     plt.figure(figsize=(7, 5))
-    plt.plot(L_list**2/200, corner_list,  "o", label='Corner')
-    plt.plot(L_list**2/200, corner_list, label='Corner')
-    plt.plot(L_list**2/200, middle_list, "o", label='Middle')
-    plt.plot(L_list**2/200, middle_list, label='Middle')
-    plt.plot(L_list**2/200, edge_list,"o", label='Edge')
-    plt.plot(L_list**2/200, edge_list, label='Edge')
+    plt.plot(L_list**2/200, corner_list,  "^", label='Corner', color='b')
+    plt.plot(L_list**2/200, corner_list, color='b')
+    plt.plot(L_list**2/200, middle_list, "o", label='Middle', color='r')
+    plt.plot(L_list**2/200, middle_list, color='r')
+    plt.plot(L_list**2/200, edge_list,"s", label='Edge', color='g')
+    plt.plot(L_list**2/200, edge_list, color='g')
     plt.legend()
     plt.title('Where do they die?')
     plt.xlabel('Prey density (number of preys per area) ')
