@@ -3,6 +3,19 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 #%%
+c = ([0.46379, 1.03103, 1.44482, 1.25793, 1.371379, 1.4848,
+1.5982, 1.71172, 1.8251, 1.9386, 2.0520, 2.1655, 2.27889, 2.3924,
+2.50586, 2.6193, 2.7327, 2.8462, 2.9596, 3.0731, 3.18655] )
+
+
+x = sorted([1.729,  2.1792, 1.6889, 1.62079, 1.3095, 1.262, 1.746,
+1.3259, 1.5138, 1.4457, 1.8287, 1.7889, 2.0977, 1.88527, 2.0491,
+2.33931, 1.7312, 1.8856, 2.0397, 2.20169, 2.442] )
+plt.figure(figsize=(8, 6))
+plt.plot(c, x, ".")
+plt.scatter(c,x, color="black")
+plt.show()
+#%%
 
 def force_no_loop(t, coord, a, b, c, p):
     prey_coord, pred_coord = coord
@@ -147,7 +160,7 @@ def force(t, coord, a, b, c, p):
     return fx, fy, fzx, fzy
 
 #%% Vores tilfælde
-def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.01, r0=0.1):
+def force_vel(t, coord, a, b, c, p, L, eta, r0):
     prey_coord, pred_coord = coord
     x, y = prey_coord
     zx, zy = pred_coord
@@ -163,7 +176,6 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.01, r0=0.1):
     dist_prey_pred = (x - zx)**2 + (y - zy)**2
     dist_xy_p2     = (xj - xk)**2 + (yj - yk)**2
     
-    # Prey dislike eachother a bit more for higher d
     d = 2
 
     # Get x and y specific, set terms with distance 0 equal to 0
@@ -182,32 +194,31 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.01, r0=0.1):
     fzx = c / N * np.sum((x - zx) / dist_prey_pred**(p/2)) # Divide p by 2 because normally squared
     fzy = c / N * np.sum((y - zy) / dist_prey_pred**(p/2))
 
-    epsilon = 0.05
-    if (x<=0 + epsilon or x>=0.99*L- epsilon or y<=0 + epsilon or y>=0.99*L- epsilon):
-        
-        theta = np.arctan(fy/fx)
-        pos = np.empty((N,2))
-        pos[:, 0] = x
-        pos[:, 1] = y
-        pos = np.clip(pos, 0, 0.99*L)
-        tree = KDTree(pos, boxsize=[L+1,L+1])
-        dist = tree.sparse_distance_matrix(tree, max_distance=r0, output_type="coo_matrix")
-        data = np.exp(theta[dist.col]*1j)
-        neigh = sparse.coo_matrix((data, (dist.row, dist.col)), shape=dist.get_shape())
-        S = np.squeeze(np.asarray(neigh.tocsr().sum(axis=1)))
     
-        theta_ny = np.angle(S) + eta * np.random.uniform(-np.pi, np.pi, size=N)
-        theta_rot = theta_ny - theta
-        fx_rot = fx * np.cos(theta_rot) - fy * np.sin(theta_rot)
-        fy_rot = fx * np.sin(theta_rot) + fy * np.cos(theta_rot)
+    epsilon = 0.01
+        
+    theta = np.arctan(fy/fx)
+    pos = np.empty((N,2))
+    pos[:, 0] = x
+    pos[:, 1] = y
+    pos = np.clip(pos, 0+epsilon, 0.99*L - epsilon)
+    tree = KDTree(pos, boxsize=[L+1,L+1])
+    dist = tree.sparse_distance_matrix(tree, max_distance=r0, output_type="coo_matrix")
+    data = np.exp(theta[dist.col]*1j)
+    neigh = sparse.coo_matrix((data, (dist.row, dist.col)), shape=dist.get_shape())
+    S = np.squeeze(np.asarray(neigh.tocsr().sum(axis=1)))
 
-        return fx_rot, fy_rot, fzx, fzy
-    else:
-        return fx, fy, fzx, fzy
+    theta_ny = np.angle(S) + eta * np.random.uniform(-np.pi, np.pi, size=N)
+    theta_rot = theta_ny - theta
+    fx_rot = fx * np.cos(theta_rot) - fy * np.sin(theta_rot)
+    fy_rot = fx * np.sin(theta_rot) + fy * np.cos(theta_rot)
+
+    return fx_rot, fy_rot, fzx, fzy
+ 
 
 
 #%% Create movement of prey and predator
-def movement(N, L, t_end, dt, a, b, c, p):
+def movement(N, L, t_end, dt, a, b, c, p, eta, r0):
     """
     N: int - Amount of prey
     L: float - Starting area which prey can be in
@@ -222,8 +233,8 @@ def movement(N, L, t_end, dt, a, b, c, p):
     fx = np.random.random(size=N)
     fy = np.random.random(size=N)
 
-    zx = 0.11
-    zy = 0.11
+    zx = L/2 + 0.2
+    zy = L/2 + +.2
     x_list = [x]
     y_list = [y]
 
@@ -244,7 +255,7 @@ def movement(N, L, t_end, dt, a, b, c, p):
         # Get values
         prey_coord = [x, y]
         predator_coord = [zx, zy]
-        fx, fy, fzx, fzy = force_vel(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p)
+        fx, fy, fzx, fzy = force_vel(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p, L=L, eta=eta, r0=r0)
         # Update values
         x = x + fx * dt
         y = y + fy * dt
@@ -253,10 +264,10 @@ def movement(N, L, t_end, dt, a, b, c, p):
 
         # Set speed equal to zero at boundaries
         # THIS MIGHT BE EASIER - fx = np.where(x > 0.99 or x<-0.99, 0, x)
-        fx[x<=0] = 0
-        fx[x>L*0.99] = 0
-        fy[y<=0] = 0
-        fy[y>L*0.99] = 0
+        fx[x<=0] = -fx[x<=0]
+        fx[x>L*0.99] = -fx[x>L*0.99]
+        fy[y<=0] = -fy[y<=0]
+        fy[y>L*0.99] = -fy[y>L*0.99]
         fzx = np.where(zx>0.99*L or zx>0.01, 0, fzx) # Able to use "or" because fzx is float and not array like fx
         fzy = np.where(zy>0.99*L or zy>0.01, 0, fzy)
 
@@ -341,18 +352,18 @@ def ani_func(prey_list, pred_list, prey_deriv_list, pred_deriv_list, dt, L=1):
     #plt.draw()
     #plt.show()
 #%%
-N=500
+N=400
 prey_coord = (np.random.uniform(0, 0.99, size=N), np.random.uniform(0, 0.99, size=N))
 pred_coord = (0.11, 0.11)
 #fx, fy, fzx, fzy = force_vel(t=1, coord=(prey_coord, pred_coord), a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=0.1)
 
-
-x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=N, L=1, t_end=2, dt=0.01, a=1.2, b=0.2, c=3, p=2.5)
+L = 2.5
+x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=N, L=L, t_end=1, dt=0.02, a=1, b=0.2, c=2.8, p=3, eta = 0.05, r0 = 0.06)
 #ani_func((x, y), (zx, zy), (fx, fy), (fzx, fzy), dt=0.2)
 
 #%%
 # Normalize vector fx, fy...
-"""
+
 for i in range(len(x)):
     f_len = np.sqrt(fx[i]**2 + fy[i]**2)
     fz_len = np.sqrt(fzx[i]**2 + fzy[i]**2)
@@ -360,7 +371,7 @@ for i in range(len(x)):
     fy[i] = fy[i]/f_len
     fzx[i] = fzx[i]/fz_len
     fzy[i] = fzy[i]/fz_len
-"""
+
 
 for i in range(len(x)):
     plt.figure(dpi=150)
@@ -369,5 +380,5 @@ for i in range(len(x)):
     plt.scatter(zx[i], zy[i], color="r", s=9)
     plt.quiver(x[i], y[i], fx[i] , fy[i])
     plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
-    plt.xlim(0,1)
-    plt.ylim(0,1)
+    plt.xlim(0,L)
+    plt.ylim(0,L)

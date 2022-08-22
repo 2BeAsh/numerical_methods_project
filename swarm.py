@@ -1,10 +1,14 @@
 #%% Imports
 import numpy as np
 import scipy as sp
+import random
 from scipy import sparse
+
 from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
+import matplotlib.animation 
 from matplotlib.animation import FuncAnimation
+from scipy.signal import find_peaks
 
 #%% Forces
 def force(t, coord, a, b, c, p):
@@ -107,7 +111,7 @@ def force_no_loop(t, coord, a, b, c, p):
     return fx, fy, fzx, fzy
 
 #%% Velocity Force
-def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
+def force_vel(t, coord, a, b, c, p, L, eta, r0):
     prey_coord, pred_coord = coord
     x, y = prey_coord
     zx, zy = pred_coord
@@ -145,7 +149,7 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
     pos = np.empty((N,2))
     pos[:, 0] = x
     pos[:, 1] = y
-    tree = KDTree(pos, boxsize=[L,L])
+    tree = KDTree(pos, boxsize=[L+0.01,L+0.01])
     dist = tree.sparse_distance_matrix(tree, max_distance=r0, output_type="coo_matrix")
     data = np.exp(theta[dist.col]*1j)
     neigh = sparse.coo_matrix((data, (dist.row, dist.col)), shape=dist.get_shape())
@@ -160,7 +164,9 @@ def force_vel(t, coord, a=1, b=1, c=2.2, p=3, L=1, eta=0.1, r0=1):
 
 
 #%% Create movement of prey and predator
-def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
+
+    
+def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
     """
     N: int - Amount of prey
     L: float - Starting area which prey can be in
@@ -172,11 +178,11 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
     t_vals = np.arange(0, t_end, dt)
     x = np.random.uniform(low=0, high=L, size=N)
     y = np.random.uniform(low=0, high=L, size=N)
-    fx = np.random.random(size=N)
-    fy = np.random.random(size=N) # Should this be 0?
+    fx = np.random.uniform(-1, 1,size=N) 
+    fy = np.random.uniform(-1, 1,size=N) 
 
-    zx = 0.3 * L # Predator starts slightly south west of center
-    zy = 0.3 * L
+    zx = 0.8 * L # Predator starts slightly south west of center
+    zy = 0.2 * L
     x_list = [x]
     y_list = [y]
     fx_list = [fx]
@@ -194,7 +200,7 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
         # Get and update values
         prey_coord = [x, y]
         predator_coord = [zx, zy]
-        fx, fy, fzx, fzy = force_no_loop(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p)
+        fx, fy, fzx, fzy = force_vel(t=t, coord=(prey_coord, predator_coord), a=a, b=b, c=c, p=p, L=L, eta=eta, r0=r0)
         x = x + fx * dt
         y = y + fy * dt
         zx = zx + fzx * dt
@@ -202,18 +208,18 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
         
         if boundary == "stop":
             # Stop particles and set their speed equal to zero at boundaries
-            fx[x < 0.01 * L] = 0
-            fx[x > 0.99 * L] = 0
-            fy[y < 0.01 * L] = 0
-            fy[y > 0.99 * L] = 0
-            fzx = np.where(zx>0.99*L or fzx>0.01*L, 0, fzx) # Able to use "or" because fzx is float and not array like fx
-            fzy = np.where(zy>0.99*L or fzy>-0.01*L, 0, fzy)
+            fx[x < 0.001 * L] = -fx[x < 0.001 * L]
+            fx[x >= 0.99 * L] = -fx[x >= 0.99 * L]
+            fy[y < 0.001 * L] = -fy[y < 0.001 * L]
+            fy[y >= 0.99 * L] = -fy[y >= 0.99 * L]
+            fzx = np.where(zx>0.99*L or fzx>0.001*L, 0, fzx) # Able to use "or" because fzx is float and not array like fx
+            fzy = np.where(zy>0.99*L or fzy>-0.001*L, 0, fzy)
     
             # Create square boundary which the particles cannot escape
-            x = np.clip(x, 0, 0.99*L)
-            y = np.clip(y, 0, 0.99*L)
-            zx = np.clip(zx, 0, 0.99*L)
-            zy = np.clip(zy, 0, 0.99*L)
+            x = np.clip(x, 0, L)
+            y = np.clip(y, 0, L)
+            zx = np.clip(zx, 0, L)
+            zy = np.clip(zy, 0, L)
 
 
         if boundary == "periodic":
@@ -255,31 +261,168 @@ def movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat=0.05):
 
         
     return x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list
+#%%
+def count_dead(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
+        
+        dead_list=[]
+        t_list = np.linspace(0, t_end, 2001)
+        print('start med loops')
+        
+        for n in range(50):
+            x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+            x_len_start = len(x_list[0])
+            for i in range(len(x_list)):
+                dead = x_len_start-len(x_list[i])
+                dead_list.append(dead)
+                
+        dead_list = np.array(dead_list) 
+        
+        dead_list = np.reshape(dead_list, (50, int(len(x_list))), order='A')
+        
+        dead_list = np.mean(np.array(dead_list), axis=0)  
+        
+        print('done med loops')
+        
+        return dead_list, t_list
+
+dead_listc1, t_range1 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=4, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+dead_listc2, t_range2 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=6, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+dead_listc3, t_range3 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=7, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+dead_listc4, t_range4 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=8, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+dead_listc5, t_range5 = count_dead(N=300, L=2, t_end=40, dt=0.02, a=1, b=0.5, c=9, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+
+#%%
+plt.figure()
+plt.step(t_range1,dead_listc1, label="c=4")
+plt.step(t_range2,dead_listc2, label="c=6")
+plt.step(t_range3,dead_listc3, label="c=7")
+plt.step(t_range4,dead_listc4, label="c=8")
+plt.step(t_range5,dead_listc5, label="c=9")
+plt.title("Prey eaten over time for different c, averaged over 50 runs")
+plt.xlabel('time')
+plt.ylabel('Prey eaten')
+plt.legend()
+plt.show()
+#%%
+def where_dead(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
+        
+        corner=0
+        middle=0
+        edge=0
+        
+        dead_list=[0]
+        #t_list = np.linspace(0, t_end, 2001)
+        print('start med loops')
+        
+        for n in range(30):
+            x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+            x_len_start = len(x_list[0])
+            for i in range(len(x_list)):
+                dead = x_len_start-len(x_list[i])
+                
+                if dead != dead_list[-1]:
+                    if (zx_list[i]<0.5 and zy_list[i]<0.5) or (zx_list[i]<0.5 and zy_list[i]>(L-0.5)) or (zy_list[i]<0.5 and zx_list[i]>(L-0.5)) or (zx_list[i]>(L-0.5) and zy_list[i]>(L-0.5)):
+                        corner+=(dead-dead_list[-1])
+                    elif zx_list[i]<0.5 or zx_list[i]>(L-0.5) or zy_list[i]<0.5 or zy_list[i]>(L-0.5):
+                        edge+=(dead-dead_list[-1])
+                    else:
+                        middle+=(dead-dead_list[-1])
+                
+                dead_list.append(dead)
+            dead_list.append(0)
+        return corner, middle, edge
+
+#corner, middle, edge = where_dead(N=300, L=6, t_end=30, dt=0.02, a=1, b=0.5, c=9.5, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+
+#%%
+
+def plot_where_dead():
+    L_list = np.linspace(1.2, 4, 50)
+    corner_list=[]
+    middle_list=[]
+    edge_list=[]
+    for L in L_list:
+        corner, middle, edge = where_dead(N=200, L=L, t_end=40, dt=0.03, a=1, b=0.5, c=9.5, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+        total = corner + middle + edge
+        corner_list.append(corner/total)
+        middle_list.append(middle/total)
+        edge_list.append(edge/total)
+    
+    plt.figure(figsize=(7, 5))
+    plt.plot(L_list**2/200, corner_list,  "^", label='Corner', color='b')
+    plt.plot(L_list**2/200, corner_list, color='b')
+    plt.plot(L_list**2/200, middle_list, "o", label='Middle', color='r')
+    plt.plot(L_list**2/200, middle_list, color='r')
+    plt.plot(L_list**2/200, edge_list,"s", label='Edge', color='g')
+    plt.plot(L_list**2/200, edge_list, color='g')
+    plt.legend()
+    plt.title('Where do they die?')
+    plt.xlabel('Prey density (number of preys per area) ')
+    plt.ylabel('Percentage dead')
+    plt.show()
+
+plot_where_dead()
+#%%
+a= np.array([1,2,3, 1,2,3])
+a = np.reshape(a, (2,3))
+print(a)
+a = np.mean(a, axis=0)
+print(a)
 
 #%% Animation function
-def ani_func(N, L, t_end, dt, a, b, c, p, r_eat=0.05, boundary="stop"):
+def ani_func(N, L, t_end, dt, a, b, c, p, r_eat, eta, r0, boundary="stop"):
     # Set up figure and axis
     fig, ax = plt.subplots(dpi=125)
-    ax.set(xlim=(0, L+1), ylim=(0, L+1))
+    ax.set(xlim=(0, L), ylim=(0, L))
 
     # Get data from movement function
-    x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat)
+    x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+    x_len_start = len(x_list[0])
+    max_vel_list_x = np.empty(len(x_list))
+ 
+    
+    print("Jeg animerer lige nu. Vent et øjeblik")
     
     # Fill in NANs
-    
-    
+    for i in range(len(x_list)):
+        if len(x_list[i]) < x_len_start:
+            x_len_diff = x_len_start - len(x_list[i])
+            max_velocity_x = sorted(fx_list[i])[70]
 
+            
+           
+            a = [np.nan] * x_len_diff
+                        
+            x_list[i] = x_list[i].tolist()
+            y_list[i] = y_list[i].tolist()
+            fx_list[i] = fx_list[i].tolist()
+            fy_list[i] = fy_list[i].tolist()
+
+            
+            x_list[i].extend(a)
+            y_list[i].extend(a)
+            fx_list[i].extend(a)
+            fy_list[i].extend(a)
+    
+    max_velocity_x = sorted(max_vel_list_x)[-10]
+
+    
+    fx_list = np.clip(fx_list, -1, 1)
+    fy_list = np.clip(fy_list, -1, 1)
+   
+            
     # First line
-    scat_prey = ax.scatter(x_list[0], y_list[0], color="b", s=2)
+    scat_prey = ax.scatter(x_list[0], y_list[0], color="b", s=3)
     scat_pred = ax.scatter(zx_list[0], zy_list[0], color="r")
-    #quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0]) # Documentation says quiver([X, Y], U, V), but we have quiver(X, Y, U, V)
-
+    quiv = ax.quiver(x_list[0], y_list[0], fx_list[0], fy_list[0] )
+    
+    
     # Boundary Box
-    ax.plot([0, 0, L, L, 0], [0, L, L, 0, 0], "k--") #OBS UPDATE WHEN TREE
-
-    # Labels
-    label_eat = ax.text(L, 0.95*L, "Prey Eaten: 0", ha="right", va="center", fontsize=12)
-    label_time = ax.text(L, 0.85*L, "Time: 0", ha="right", va="center", fontsize=12)
+    ax.plot([0, 0, L, L, 0], [0, L, L, 0, 0], linewidth=1.5, color="darkgreen") 
+    ax.axes.xaxis.set_ticklabels([])
+    ax.axes.yaxis.set_ticklabels([])
+    ax.axis('off')
+  
 
     # Update line function
     def animation(i):
@@ -288,32 +431,129 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat=0.05, boundary="stop"):
         scat_pred.set_offsets(np.c_[zx_list[i], zy_list[i]])
 
         # Update quiver
-        #print("x:", x_list[i].size)
-        #print("y:", y_list[i].size)
-        #print("fx:", fx_list[i].size)
-        #print("fy:", fy_list[i].size, flush=True)
-        #quiv.set_offsets(np.c_[x_list[i], y_list[i]]) #
-        #quiv.set_UVC(fx_list[i], fy_list[i]) # Has a problem when prey are eaten
+        quiv.set_offsets(np.c_[x_list[i], y_list[i]])
+        quiv.set_UVC(fx_list[i], fy_list[i]) 
 
         # Update labels
-        prey_eat = len(x_list[0]) - len(x_list[i])
-        time_count_str = "Time: " + str(round(i * dt, 1))
-        label_eat.set_text(f"Prey Eaten: {prey_eat}")
-        label_time.set_text(time_count_str)
-
-    anim = FuncAnimation(fig, animation, interval=125, frames=len(x_list))
-    anim.save("animation.mp4")
-    #plt.draw()
-    #plt.show()
-
+        prey_eat = np.count_nonzero(np.isnan(x_list[i]))
+        prey = np.count_nonzero(~np.isnan(x_list[i]))
+        ax.set_title(f'Alive prey: {prey}, Dead prey: {prey_eat}, Time: {np.round(i * dt, 2)}', loc='left')
+        ax.axes.xaxis.set_ticklabels([])
+        ax.axes.yaxis.set_ticklabels([])
+        ax.set_axis_off()
+    
+    f = r"C:\Users\caird\Documents\Cairui\Python1\Numerical Methods\Week4 Project\numerical_methods_project\save_animations.mp4" 
+    anim = FuncAnimation(fig, animation, interval= t_end , frames=len(x_list))
+    #writervideo = matplotlib.animation.FFMpegWriter(fps=60)
+    anim.save(f, writer="ffmpeg")
+    
 
 #%% Test animation function
-ani_func(N=3, L=1, t_end=1, dt=0.01, a=1, b=1, c=1, p=2.5, boundary="periodic")
+
+ani_func(N=300, L=2, t_end=20, dt=0.01, a=1, b=0.7, c=6.7, p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+#%%
+import matplotlib
+print(matplotlib.__version__)
+
+
+#%%
+def pred_bane(N, L, t_end, dt, a, b, c_list, p, boundary, r_eat, eta, r0):
+    for c in c_list:
+        
+        x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+        plt.figure()
+        plt.plot(zx_list[1700:], zy_list[1700:], ".")
+        plt.xlim(1,6)
+        plt.ylim(1,6)
+        plt.show()
+
+
+#pred_bane(N=300, L=6, t_end=30, dt=0.01, a=1, b=0.7, c_list=[0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 1, 1.5, 2, 3, 4,4.5, 5,5.5, 6,6.5,7 ], p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+
+#%%
+def pred_bane_x(N, L, t_end, dt, a, b, c_list, p, boundary, r_eat, eta, r0):
+
+    
+    peak_list=[]
+    minima_list=[]
+    #c_before_bifurcation = np.linspace(0.01, 3.3, 30)
+    #print("går i gang med første loop")
+    """
+    for c in c_before_bifurcation:
+        #t_list = np.linspace(0, t_end*10, 3000, endpoint=False)
+        t_list = np.linspace(0, t_end, 13000, endpoint=False)
+        t = t_end
+        x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N=N, L=L, t_end=t, dt=dt, a=a, b=b, c=c, p=p, boundary=boundary, r_eat=r_eat, eta=eta, r0=r0)
+        
+        print(np.array(zx_list)[-3:])
+        plt.figure()
+        plt.plot(t_list[:], zx_list[:-1], ".", markersize="3", label=f'c={c}')
+        plt.ylim(0,5)
+        plt.xlim(0,t_end)
+        plt.title('Predator movement (x-coordinate)')
+        plt.legend()
+        plt.xlabel('time/ s')
+        plt.ylabel('x-coordinate')
+        plt.show()
+    """    
+        
+    print("færdig med første loop")
+    
+    for c in c_list:
+        
+
+        x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+        zx_revers = np.array(zx_list[:-1])*-1
+        
+        minima,_= find_peaks(zx_revers, height=-5)
+        #print(zx_revers)
+        #print(minima)
+        peaks, _ = find_peaks(zx_list[:-1], height=2)
+        
+        
+        """
+        plt.figure()
+        plt.plot(t_list[:], zx_list[:-1], ".", markersize="3", label=f'c={c}')
+        plt.plot(np.array(t_list)[peaks], np.array(zx_list)[:-1][peaks], "x", markersize="7", label='Maxima')
+        plt.plot(np.array(t_list)[minima], np.array(zx_list)[:-1][minima], "x", markersize="7", label='Minima')
+       
+        plt.ylim(0,5)
+        plt.xlim(0,t_end)
+        plt.title('Predator movement (x-coordinate)')
+        plt.legend()
+        plt.xlabel('time/ s')
+        plt.ylabel('x-coordinate')
+        plt.show()
+        """
+        
+        peak_list.append(np.array(zx_list)[:-1][peaks][5:])
+        minima_list.append(np.array(zx_list)[:-1][minima][5:])
+    
+    print("går i gang med sidste loop")
+    c = ([ 1.03103, 1.44482, 1.25793, 1.371379, 1.4848,
+    1.5982, 1.71172, 1.8251, 1.9386, 2.0520, 2.1655, 2.27889, 2.3924,
+    2.50586, 2.6193, 2.7327, 2.8462, 2.9596, 3.0731, 3.18655, 3.211, 3.2995] )
+
+
+    x = sorted([ 2.1792, 1.6889, 1.62079, 1.3095, 1.362, 1.746,
+    1.3259, 1.5138, 1.4457, 1.8287, 1.7889, 2.0977, 1.88527, 2.0491,
+    2.33931, 1.7312, 1.8856, 2.0397, 2.20169, 2.442, 2.541, 2.665] )
+    plt.figure(figsize=(8, 6))
+    plt.scatter(c, x, color="black", s=6)
+    for x, y, z in zip(c_list, peak_list, minima_list):
+        plt.scatter([x] * len(y), y, color='black', s=6)
+        plt.scatter([x] * len(z), z, color='black', s=6)
+        plt.xlabel('c-value')
+        plt.ylabel('x')
+    plt.show()
+
+
+#pred_bane_x(N=300, L=6, t_end=30, dt=0.02, a=1, b=0.7, c_list=np.linspace(3.35, 15, 150), p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
 
 #%%
 def plot_quiver():
     # Normalize vector fx, fy...
-    x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=200, L=1, t_end=5, dt=0.2, a=1, b=0.2, c=4, p=2.5)
+    x, y, zx, zy, fx, fy, fzx, fzy, N_living =  movement(N=1, L=1, t_end=2, dt=0.01, a=1, b=1, c=1, p=2.5, boundary="periodic")
     for i in range(len(x)):
         f_len = np.sqrt(fx[i]**2 + fy[i]**2)
         fz_len = np.sqrt(fzx[i]**2 + fzy[i]**2)
@@ -329,6 +569,18 @@ def plot_quiver():
         plt.scatter(zx[i], zy[i], color="r", s=4)
         plt.quiver(x[i], y[i], fx[i] , fy[i])
         plt.quiver(zx[i], zy[i], fzx[i] , fzy[i], color="r")
-        plt.xlim(-1.2,1.2)
-        plt.ylim(-1.2,1.2)
+        plt.xlim(0,1)
+        plt.ylim(0,1)
 #plot_quiver()
+
+#%%
+c = ([0.46379, 1.03103, 1.44482, 1.25793, 1.371379, 1.4848,
+1.5982, 1.71172, 1.8251, 1.9386, 2.0520, 2.1655, 2.27889, 2.3924,
+2.50586, 2.6193, 2.7327, 2.8462, 2.9596, 3.0731, 3.18655] )
+
+
+x = ([1.729,  2.1792, 1.6889, 1.62079, 1.3095, 1.262, 1.746,
+1.3259, 1.5138, 1.4457, 1.8287, 1.7889, 2.0977, 1.88527, 2.0491,
+2.33931, 1.7312, 1.8856, 2.0397, 2.20169, 2.442] )
+
+plt.plot(c, x)
