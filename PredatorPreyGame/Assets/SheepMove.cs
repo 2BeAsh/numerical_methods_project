@@ -19,7 +19,7 @@ public class SheepMove : MonoBehaviour
     }
 
 
-    private void Update()
+    private void FixedUpdate()
     {
         /* Movement 
         Loop through each member and calculate their velocity, and from that update their position.
@@ -55,7 +55,7 @@ public class SheepMove : MonoBehaviour
             // Update position from velocity calculations
             //prey.transform.position += velocity * Time.fixedDeltaTime;  - Doesn't allow for physics
             Rigidbody2D preyRB = prey.GetComponent<Rigidbody2D>(); // Get j'th particle's rigidbody and update its position
-           preyRB.MovePosition(preyRB.position + ((Vector2)velocity * Time.deltaTime));
+           preyRB.MovePosition(preyRB.position + ((Vector2)velocity * Time.fixedDeltaTime)); // Changed to fixedDeltaTime since using FixedUpdate for rigid body
             
         }
 
