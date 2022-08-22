@@ -6,6 +6,7 @@ from scipy import sparse
 
 from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
+import matplotlib.animation 
 from matplotlib.animation import FuncAnimation
 from scipy.signal import find_peaks
 
@@ -303,10 +304,64 @@ plt.ylabel('Prey eaten')
 plt.legend()
 plt.show()
 #%%
+def where_dead(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0):
+        
+        corner=0
+        middle=0
+        edge=0
+        
+        dead_list=[0]
+        #t_list = np.linspace(0, t_end, 2001)
+        print('start med loops')
+        
+        for n in range(20):
+            x_list, y_list, zx_list, zy_list, fx_list, fy_list, fzx_list, fzy_list, N_list = movement(N, L, t_end, dt, a, b, c, p, boundary, r_eat, eta, r0)
+            x_len_start = len(x_list[0])
+            for i in range(len(x_list)):
+                dead = x_len_start-len(x_list[i])
+                
+                if dead != dead_list[-1]:
+                    if (zx_list[i]<0.5 and zy_list[i]<0.5) or (zx_list[i]<0.5 and zy_list[i]>(L-0.5)) or (zy_list[i]<0.5 and zx_list[i]>(L-0.5)) or (zx_list[i]>(L-0.5) and zy_list[i]>(L-0.5)):
+                        corner+=(dead-dead_list[-1])
+                    elif zx_list[i]<0.5 or zx_list[i]>(L-0.5) or zy_list[i]<0.5 or zy_list[i]>(L-0.5):
+                        edge+=(dead-dead_list[-1])
+                    else:
+                        middle+=(dead-dead_list[-1])
+                
+                dead_list.append(dead)
+            dead_list.append(0)
+        return corner, middle, edge
 
+#corner, middle, edge = where_dead(N=300, L=6, t_end=30, dt=0.02, a=1, b=0.5, c=9.5, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
 
+#%%
 
+def plot_where_dead():
+    L_list = np.linspace(1.2, 4, 37)
+    corner_list=[]
+    middle_list=[]
+    edge_list=[]
+    for L in L_list:
+        corner, middle, edge = where_dead(N=200, L=L, t_end=30, dt=0.03, a=1, b=0.5, c=9.5, p=2.5, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+        total = corner + middle + edge
+        corner_list.append(corner/total)
+        middle_list.append(middle/total)
+        edge_list.append(edge/total)
+    
+    plt.figure(figsize=(7, 5))
+    plt.plot(L_list**2/200, corner_list,  "o", label='Corner')
+    plt.plot(L_list**2/200, corner_list, label='Corner')
+    plt.plot(L_list**2/200, middle_list, "o", label='Middle')
+    plt.plot(L_list**2/200, middle_list, label='Middle')
+    plt.plot(L_list**2/200, edge_list,"o", label='Edge')
+    plt.plot(L_list**2/200, edge_list, label='Edge')
+    plt.legend()
+    plt.title('Where do they die?')
+    plt.xlabel('Prey density (number of preys per area) ')
+    plt.ylabel('Percentage dead')
+    plt.show()
 
+plot_where_dead()
 #%%
 a= np.array([1,2,3, 1,2,3])
 a = np.reshape(a, (2,3))
@@ -386,13 +441,21 @@ def ani_func(N, L, t_end, dt, a, b, c, p, r_eat, eta, r0, boundary="stop"):
         ax.axes.xaxis.set_ticklabels([])
         ax.axes.yaxis.set_ticklabels([])
         ax.set_axis_off()
-    anim = FuncAnimation(fig, animation, interval= t_end*0.9 , frames=len(x_list))
-    anim.save("animation_ny.mp4")
-    #plt.draw()
-    #plt.show()
+    
+    f = r"C:\Users\caird\Documents\Cairui\Python1\Numerical Methods\Week4 Project\numerical_methods_project\save_animations.mp4" 
+    anim = FuncAnimation(fig, animation, interval= t_end , frames=len(x_list))
+    #writervideo = matplotlib.animation.FFMpegWriter(fps=60)
+    anim.save(f, writer="ffmpeg")
+    
 
 #%% Test animation function
-ani_func(N=300, L=2, t_end=20, dt=0.01, a=1, b=0.7, c=6.8, p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+
+ani_func(N=300, L=2, t_end=20, dt=0.01, a=1, b=0.7, c=6.7, p=2.7, r_eat=0.02, eta=0.015, r0=0.05, boundary="stop")
+#%%
+import matplotlib
+print(matplotlib.__version__)
+
+
 #%%
 def pred_bane(N, L, t_end, dt, a, b, c_list, p, boundary, r_eat, eta, r0):
     for c in c_list:
