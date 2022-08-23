@@ -37989,7 +37989,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7782341, y: 1}
+    m_SensorSize: {x: 1.7793103, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -38111,6 +38111,11 @@ PrefabInstance:
       propertyPath: guardObj
       value: 
       objectReference: {fileID: 307058188}
+    - target: {fileID: 3690382234424397420, guid: e92fcff404f4d394ab427e465dca8150,
+        type: 3}
+      propertyPath: shootRadius
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 7929904399756416655, guid: e92fcff404f4d394ab427e465dca8150,
         type: 3}
       propertyPath: m_SortingOrder
@@ -38125,6 +38130,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3898273068689839764, guid: eb0d246c5cc5d5148be6d7467cfb5ed6,
+        type: 3}
+      propertyPath: health
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4223586088814531770, guid: eb0d246c5cc5d5148be6d7467cfb5ed6,
         type: 3}
       propertyPath: m_SortingOrder
@@ -38189,6 +38199,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 5372514091239347367, guid: eb0d246c5cc5d5148be6d7467cfb5ed6,
+        type: 3}
+      propertyPath: m_CullingMode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6744599872506313660, guid: eb0d246c5cc5d5148be6d7467cfb5ed6,
         type: 3}

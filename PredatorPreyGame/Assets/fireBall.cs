@@ -20,7 +20,11 @@ public class fireBall : MonoBehaviour
     private void Update()
     {
         transform.position = Vector2.MoveTowards(transform.position, target, speed * Time.deltaTime); 
-
+        // Destroy particle when it reaches player's initial position.
+        if (transform.position.x == target.x && transform.position.y == target.y)
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -29,8 +33,8 @@ public class fireBall : MonoBehaviour
         if (player != null)
         {
             player.TakeDamage(damage);
+            Destroy(gameObject);
         }
-        Destroy(gameObject);     
     }
     
         
