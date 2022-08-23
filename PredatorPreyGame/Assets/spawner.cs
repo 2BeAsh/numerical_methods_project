@@ -20,7 +20,7 @@ public class spawner : MonoBehaviour
         for (int i = 0; i < objectNum; i++)
         {
             Vector3 spawnLoc = new Vector3(Random.Range(-spawnRadius, spawnRadius),
-                                           Random.Range(-spawnRadius, spawnRadius),
+                                           Random.Range(-spawnRadius/2, spawnRadius/2),
                                            0);
             GameObject objectClone = Instantiate(objectToSpawn, spawnLoc, Quaternion.identity);
         }
