@@ -5,6 +5,7 @@ using UnityEngine;
 public class fireBall : MonoBehaviour
 {
     public float speed = 1f;
+    public int damage = 1;
     public Rigidbody2D rb;
     private Transform player;
     private Vector2 target;
@@ -24,7 +25,11 @@ public class fireBall : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Player player = collision.GetComponent<Player>();
+        playerHealth player = collision.GetComponent<playerHealth>();
+        if (player != null)
+        {
+            player.TakeDamage(damage);
+        }
         Destroy(gameObject);     
     }
     
