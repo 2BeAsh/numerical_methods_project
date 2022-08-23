@@ -5,7 +5,6 @@ using UnityEngine;
 public class Prey : MonoBehaviour
 {
     Animator animator;
-    spawner spawnObj;
 
     public float Health
     {
