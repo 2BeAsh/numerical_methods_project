@@ -7,9 +7,6 @@ public class SheepMove : MonoBehaviour
     public float longRangeAttraction;
     public float predatorRepulsion;
     private GameObject playerObj = null;
-    public ContactFilter2D movementFilter; // For ray casting - Finding obstacles
-    public float collisionOffset = 0.05f; // For ray casting 
-    public int layer;
 
     // Start is called before the first frame update
     private void Start()
@@ -76,28 +73,9 @@ public class SheepMove : MonoBehaviour
 
             }
             float dist_pred = Vector2.Distance(prey.transform.position, playerObj.transform.position);
-            Vector2 velocityPredRepulsion = predatorRepulsion * (prey.transform.position - playerObj.transform.position) / (dist_pred * dist_pred);
+            Vector2 velocityPredRepulsion = predatorRepulsion * (prey.transform.position - playerObj.transform.position) / Mathf.Pow(dist_pred, 2);
             velocity += velocityPredRepulsion;
         return velocity;
-    }
-
-
-    private bool checkCollision(int layer, GameObject prey, Vector2 velocity)
-    {
-        int layerMask = 1 << layer;
-        //layerMask = ~layerMask; // Collide against everything except object on specified layer
-        RaycastHit hit;
-
-        float velocity_norm = Mathf.Sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-
-        if (Physics.Raycast(prey.transform.position, velocity, out hit, velocity_norm, layerMask)){
-            Debug.Log("Raycast Hit");
-            return true;
-        }
-        else
-        {
-            return false;
-        }
     }
 
 }
