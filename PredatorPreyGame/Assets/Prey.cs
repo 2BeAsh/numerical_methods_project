@@ -26,6 +26,7 @@ public class Prey : MonoBehaviour
     }
 
     public float health = 1;
+    public int scoreIncreaseAmount;
 
     public void Start()
     {
@@ -35,6 +36,7 @@ public class Prey : MonoBehaviour
 
     public void Defeated()
     {
+        scoreCounter.instance.increaseScore(scoreIncreaseAmount);
         audioPlayerDeath.Play();
         animator.SetTrigger("Defeated");
 
