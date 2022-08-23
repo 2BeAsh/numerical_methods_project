@@ -5,6 +5,8 @@ using UnityEngine;
 public class Prey : MonoBehaviour
 {
     Animator animator;
+    public AudioSource audioPlayerCollide;
+    public AudioSource audioPlayerDeath;
 
     public float Health
     {
@@ -33,12 +35,23 @@ public class Prey : MonoBehaviour
 
     public void Defeated()
     {
-        animator.SetTrigger("Defeated");    
+        audioPlayerDeath.Play();
+        animator.SetTrigger("Defeated");
+
     }
 
     public void RemoveEnemy()
     {
+
         Destroy(gameObject);
+    }
+
+    public void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.tag == "Player")
+        {
+            audioPlayerCollide.Play();
+        }
     }
 
 
