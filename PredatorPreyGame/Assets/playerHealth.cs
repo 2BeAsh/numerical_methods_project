@@ -8,6 +8,12 @@ public class playerHealth : MonoBehaviour
     public int health = 10;
     Animator animator;
 
+
+    private void Start()
+    {
+        animator = GetComponent<Animator>(); 
+    }
+
     public void TakeDamage(int damage)
     {
         health -= damage;
@@ -19,6 +25,6 @@ public class playerHealth : MonoBehaviour
 
     void Die()
     {
-        animator.SetTrigger("Defeated");
+        animator.SetTrigger("death");
     }
 }
