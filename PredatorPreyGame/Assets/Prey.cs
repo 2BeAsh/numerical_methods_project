@@ -8,8 +8,10 @@ public class Prey : MonoBehaviour
     public AudioSource audioPlayerCollide;
     public AudioSource audioPlayerDeath;
     public ParticleSystem bloodParticleSys;
+    
     public bool once = true;
 
+    List<AudioSource> AudioObjectsDeath = new();
 
     public float Health
     {
@@ -34,14 +36,30 @@ public class Prey : MonoBehaviour
     public void Start()
     {
         animator = GetComponent<Animator>();
+
+        // Get all objects that contain audio files and append their AudioSource component to a list
+        foreach (GameObject fooObj in GameObject.FindGameObjectsWithTag("PreyDeathAudio")) 
+        {
+            AudioSource AudioObject = fooObj.GetComponent<AudioSource>();
+
+            AudioObjectsDeath.Add(AudioObject);
+        }
     }
 
+    private void playDeathSound()
+    {
+        int AudioOptions = AudioObjectsDeath.Count;
+        int PlayIndex = Random.Range(0, AudioOptions);
+        AudioSource PlayAudio = AudioObjectsDeath[PlayIndex];
+        PlayAudio.Play();
+    }
 
     public void Defeated()
     {
         bloodParticleEffect();
         scoreCounter.instance.increaseScore(scoreIncreaseAmount);
-        audioPlayerDeath.Play();
+        playDeathSound();
+        //audioPlayerDeath.Play();
          
         animator.SetTrigger("Defeated");
 
@@ -68,5 +86,6 @@ public class Prey : MonoBehaviour
         bloodParticleSys.Play();
         once = false;
     }
+
 
 }
