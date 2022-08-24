@@ -50,7 +50,7 @@ AudioSource:
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
+  Priority: 179
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 500
@@ -361,6 +361,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioPlayer_fireball_gotHit: {fileID: 9184769092291955915}
   you_dead: {fileID: 877199846238108436}
+  GameOverScreenObj: {fileID: 0}
   hearts:
   - {fileID: 0}
   - {fileID: 0}

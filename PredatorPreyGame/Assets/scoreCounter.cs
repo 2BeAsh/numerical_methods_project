@@ -8,7 +8,7 @@ public class scoreCounter : MonoBehaviour
     public static scoreCounter instance;
 
     public TMP_Text scoreText;
-    public int currentScore = 0;
+    public static int currentScore;
 
 
     private void Awake()
@@ -19,6 +19,7 @@ public class scoreCounter : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        currentScore = 0;
         scoreText.text = "SCORE: " + currentScore.ToString();
      }
 

@@ -8,7 +8,8 @@ public class playerHealth : MonoBehaviour
     public AudioSource audioPlayer_fireball_gotHit;
     public AudioSource you_dead;
     Animator animator;
-    
+
+    public GameOverScreen GameOverScreenObj;
     public GameObject[] hearts;
     public int health = 4;
     private bool alive = true;
@@ -60,6 +61,14 @@ public class playerHealth : MonoBehaviour
         {
             animator.SetTrigger("death");
             you_dead.Play();
+            GameOver();
         }
     }
+
+    public void GameOver()
+    {
+        int finalScore = scoreCounter.currentScore;
+        GameOverScreenObj.Setup(finalScore);
+    }
+
 }
