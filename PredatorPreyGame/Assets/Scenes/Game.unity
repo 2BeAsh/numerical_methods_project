@@ -13514,10 +13514,10 @@ RectTransform:
   m_Father: {fileID: 1026943511}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -333, y: 220}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 933, y: -25}
+  m_SizeDelta: {x: 1866, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &799285698
 MonoBehaviour:
@@ -13602,7 +13602,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -664.4581, w: 0}
+  m_margin: {x: 0, y: 0, z: -4.0620117, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -45201,6 +45201,16 @@ Tilemap:
       dummyAlignment: 0
       m_AllTileFlags: 1073741825
   - first: {x: -1, y: 0, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 17
+      m_TileSpriteIndex: 17
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 0
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 0, y: 0, z: 0}
     second:
       serializedVersion: 2
       m_TileIndex: 17
@@ -77726,7 +77736,7 @@ Tilemap:
     m_Data: {fileID: 11400000, guid: 840f525ad0955394790d2e7e98645be2, type: 2}
   - m_RefCount: 1
     m_Data: {fileID: 11400000, guid: fba88d4053ecbd643a1e54962d41be21, type: 2}
-  - m_RefCount: 6047
+  - m_RefCount: 6048
     m_Data: {fileID: 11400000, guid: 069b408c9e24e664f9789dc207876efd, type: 2}
   m_TileSpriteArray:
   - m_RefCount: 0
@@ -77763,10 +77773,10 @@ Tilemap:
     m_Data: {fileID: -1305425822, guid: 9f89cba75a23d564ea58b1df1ed8951d, type: 3}
   - m_RefCount: 1
     m_Data: {fileID: 1136679523, guid: 9f89cba75a23d564ea58b1df1ed8951d, type: 3}
-  - m_RefCount: 6047
+  - m_RefCount: 6048
     m_Data: {fileID: 572765367, guid: 9f89cba75a23d564ea58b1df1ed8951d, type: 3}
   m_TileMatrixArray:
-  - m_RefCount: 6383
+  - m_RefCount: 6384
     m_Data:
       e00: 1
       e01: 0
@@ -77785,7 +77795,7 @@ Tilemap:
       e32: 0
       e33: 1
   m_TileColorArray:
-  - m_RefCount: 6383
+  - m_RefCount: 6384
     m_Data: {r: 1, g: 1, b: 1, a: 1}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
@@ -78051,9 +78061,9 @@ MonoBehaviour:
   m_DeadZoneWidth: 0
   m_DeadZoneHeight: 0
   m_DeadZoneDepth: 0
-  m_UnlimitedSoftZone: 0
-  m_SoftZoneWidth: 0.8
-  m_SoftZoneHeight: 0.8
+  m_UnlimitedSoftZone: 1
+  m_SoftZoneWidth: 0.88574487
+  m_SoftZoneHeight: 1.0012321
   m_BiasX: 0
   m_BiasY: 0
   m_CenterOnActivate: 1
@@ -78186,7 +78196,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.9716777, y: 1}
+    m_SensorSize: {x: 1.6001838, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -78417,6 +78427,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_DefaultActionMap
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 6860268530138310827, guid: eb0d246c5cc5d5148be6d7467cfb5ed6,
+        type: 3}
+      propertyPath: m_Size.y
+      value: 0.18300107
+      objectReference: {fileID: 0}
+    - target: {fileID: 6860268530138310827, guid: eb0d246c5cc5d5148be6d7467cfb5ed6,
+        type: 3}
+      propertyPath: m_Offset.x
+      value: 0.0015376508
+      objectReference: {fileID: 0}
+    - target: {fileID: 6860268530138310827, guid: eb0d246c5cc5d5148be6d7467cfb5ed6,
+        type: 3}
+      propertyPath: m_Offset.y
+      value: -0.078663334
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eb0d246c5cc5d5148be6d7467cfb5ed6, type: 3}
