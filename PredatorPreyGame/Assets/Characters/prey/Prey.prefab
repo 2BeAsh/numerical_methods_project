@@ -266,8 +266,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8923928f9dd76d6458b44c9c95cf78fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioPlayer: {fileID: 6118468141942401557}
+  audioPlayerCollide: {fileID: 0}
+  audioPlayerDeath: {fileID: 0}
+  deathparticlesystem: {fileID: 4608105772825970737, guid: 8b8d34590af405f48bda8e6881a04c7e,
+    type: 3}
+  sr: {fileID: 5032509699904143807}
+  once: 1
   health: 1
+  scoreIncreaseAmount: 0
 --- !u!95 &5587476728969435700
 Animator:
   serializedVersion: 4

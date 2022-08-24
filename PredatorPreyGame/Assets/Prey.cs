@@ -7,12 +7,13 @@ public class Prey : MonoBehaviour
     Animator animator;
     public AudioSource audioPlayerCollide;
     public AudioSource audioPlayerDeath;
+    
     /*
     public ParticleSystem deathparticlesystem;
     public SpriteRenderer sr;
 
-    public bool once = true; */
-
+    public bool once = true; 
+    */
     public float Health
     {
         set
@@ -44,6 +45,14 @@ public class Prey : MonoBehaviour
     {
         scoreCounter.instance.increaseScore(scoreIncreaseAmount);
         audioPlayerDeath.Play();
+        
+            
+        animator.SetTrigger("Defeated");
+
+    }
+
+    public void RemoveEnemy()
+    {
         /*
         var em = deathparticlesystem.emission;
         var dur = deathparticlesystem.main.duration;
@@ -51,16 +60,9 @@ public class Prey : MonoBehaviour
         em.enabled = true;
         deathparticlesystem.Play();
         once = false;
-        Destroy(sr);
+        //Destroy(sr);
         Invoke(nameof(DestroyObject), dur);
         */
-        animator.SetTrigger("Defeated");
-
-    }
-
-    public void RemoveEnemy()
-    {
-
         Destroy(gameObject);
     }
 
