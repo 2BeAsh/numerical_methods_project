@@ -361,7 +361,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioPlayer_fireball_gotHit: {fileID: 9184769092291955915}
   you_dead: {fileID: 877199846238108436}
-  health: 0
+  hearts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  health: 4
 --- !u!1 &4307856625473085987
 GameObject:
   m_ObjectHideFlags: 0
