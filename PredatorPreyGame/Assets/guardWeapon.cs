@@ -8,6 +8,9 @@ public class guardWeapon : MonoBehaviour
     public GameObject guardObj;
     private GameObject playerObj = null;
     public GameObject bulletPrefab;
+    public AudioSource audioPlayer_fireball;
+    
+
 
     public float shootRadius;
     private float timeBtwShots;
@@ -48,6 +51,9 @@ public class guardWeapon : MonoBehaviour
     {
         // Shooting Logic
         Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
-
+        audioPlayer_fireball.Play();
     }
+
+
+
 }
