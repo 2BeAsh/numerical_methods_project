@@ -77843,6 +77843,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1638922437932628993, guid: eb0d246c5cc5d5148be6d7467cfb5ed6,
+        type: 3}
+      propertyPath: m_Constraints
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3898273068689839764, guid: eb0d246c5cc5d5148be6d7467cfb5ed6,
         type: 3}
       propertyPath: GameOverScreenObj
