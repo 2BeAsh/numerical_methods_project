@@ -162,7 +162,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0.00048828, y: -314}
-  m_SizeDelta: {x: 282.84, y: 30}
+  m_SizeDelta: {x: 565.68, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &22583846
 Animator:
@@ -447,7 +447,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.85
+  m_fontSize: 53.7
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -616,7 +616,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0.00048828, y: -314}
-  m_SizeDelta: {x: 282.84, y: 30}
+  m_SizeDelta: {x: 565.68, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &149041340
 Animator:
@@ -628,7 +628,7 @@ Animator:
   m_GameObject: {fileID: 149041338}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: a4d3d7e38c1940649b5bc4f7191a3802, type: 2}
+  m_Controller: {fileID: 9100000, guid: f22ae1cd995a07645ada6d637cb6581c, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -874,8 +874,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.1169, y: -62}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 7, y: -116}
+  m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &222358587
 MonoBehaviour:
@@ -1000,7 +1000,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 23.3
+  m_fontSize: 55.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1036,7 +1036,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: -115.54358, y: -77.02905, z: -114.00305, w: -32.352234}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1595,7 +1595,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 14.9999695, y: -313}
-  m_SizeDelta: {x: 282.84, y: 30}
+  m_SizeDelta: {x: 565.68, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &1399445052
 Animator:
@@ -1607,7 +1607,7 @@ Animator:
   m_GameObject: {fileID: 1399445050}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: a4d3d7e38c1940649b5bc4f7191a3802, type: 2}
+  m_Controller: {fileID: 9100000, guid: e3f08592500634b458cc6ff4fa6b3c60, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1860,8 +1860,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 39
+  m_fontSizeBase: 39
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1950,7 +1950,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 242.5781, y: -10}
-  m_SizeDelta: {x: 282.8439, y: 171.1741}
+  m_SizeDelta: {x: 565.6878, y: 342.3482}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1504087762
 MonoBehaviour:
@@ -2453,7 +2453,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: PLAY AS WOLF
+  m_text: WAIT FOR NEXT UPDATE
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2480,10 +2480,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
+  m_fontSize: 42.3
   m_fontSizeBase: 18
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
@@ -2581,7 +2581,7 @@ Animator:
   m_GameObject: {fileID: 2027638045}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: a4d3d7e38c1940649b5bc4f7191a3802, type: 2}
+  m_Controller: {fileID: 9100000, guid: 1d15cc0629a4be24f96fe69e46842fc4, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
