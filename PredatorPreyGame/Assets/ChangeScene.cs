@@ -18,5 +18,15 @@ public class ChangeScene : MonoBehaviour
         SceneManager.LoadScene("Game");
     }
 
+    public void CharacterSelection()
+    {
+        SceneManager.LoadScene("CharacterSelection");
+    }
+
+    public void Credits()
+    {
+        SceneManager.LoadScene("Credits");
+    }
+
 
 }

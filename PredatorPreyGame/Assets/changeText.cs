@@ -20,7 +20,6 @@ public class changeText : MonoBehaviour
 
     }
 
-
     private void OnMouseOver()
     {
         textContent.text = TextOnHover;
