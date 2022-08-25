@@ -59,7 +59,6 @@ public class Prey : MonoBehaviour
         bloodParticleEffect();
         scoreCounter.instance.increaseScore(scoreIncreaseAmount);
         playDeathSound();
-        //audioPlayerDeath.Play();
          
         animator.SetTrigger("Defeated");
 

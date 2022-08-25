@@ -10,9 +10,7 @@ public class guardWeapon : MonoBehaviour
     public GameObject bulletPrefab;
     public AudioSource audioPlayer_fireball;
     
-
-
-    public float shootRadius;
+    public float shootRadius = 2;
     private float timeBtwShots;
     public float startTimeBtwShots;
 
@@ -24,7 +22,6 @@ public class guardWeapon : MonoBehaviour
         }
 
         timeBtwShots = startTimeBtwShots;
-
     }
 
     // Update is called once per frame

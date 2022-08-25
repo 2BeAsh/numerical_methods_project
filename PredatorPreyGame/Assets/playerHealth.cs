@@ -5,6 +5,7 @@ using UnityEngine;
 public class playerHealth : MonoBehaviour
 
 {
+    public ParticleSystem bloodParticleSys;
     public AudioSource audioPlayer_fireball_gotHit;
     public AudioSource you_dead;
     Animator animator;
@@ -40,12 +41,12 @@ public class playerHealth : MonoBehaviour
     }
 
 
-
     public void TakeDamage(int damage)
     {
         if (alive == true)
         {
             health -= damage;
+            bloodParticleEffect();
             audioPlayer_fireball_gotHit.Play();
             if (health <= 0)
             {
@@ -63,6 +64,13 @@ public class playerHealth : MonoBehaviour
             you_dead.Play();
             GameOver();
         }
+    }
+
+    public void bloodParticleEffect()
+    {
+        var em = bloodParticleSys.emission;
+        em.enabled = true;
+        bloodParticleSys.Play();
     }
 
     public void GameOver()
